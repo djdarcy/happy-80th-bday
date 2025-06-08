@@ -20,8 +20,13 @@ function adjustClickTargetSize(delta) {
     window.gameSettings.clickTargetSize += delta;
     window.gameSettings.clickTargetSize = Math.max(50, Math.min(300, window.gameSettings.clickTargetSize));
     document.querySelectorAll('.baseball-wrapper').forEach(wrapper => {
-        wrapper.style.width = window.gameSettings.clickTargetSize + 'px';
-        wrapper.style.height = window.gameSettings.clickTargetSize + 'px';
+        // Check if it's a golden baseball and apply the 0.7x multiplier
+        const isGolden = wrapper.classList.contains('golden-baseball');
+        const size = isGolden ? 
+            Math.round(window.gameSettings.clickTargetSize * 0.7) : 
+            window.gameSettings.clickTargetSize;
+        wrapper.style.width = size + 'px';
+        wrapper.style.height = size + 'px';
     });
     console.log('Click target size:', window.gameSettings.clickTargetSize);
 }

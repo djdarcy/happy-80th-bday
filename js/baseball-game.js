@@ -51,14 +51,23 @@ function createBaseball() {
     const isGolden = Random.between(0, 100) < 5; // 5% chance
     
     // Create wrapper div that will handle clicks
+    // Golden baseballs have smaller hitbox and move faster
+    const hitboxSize = isGolden ? 
+        Math.round(window.gameSettings.clickTargetSize * 0.7) : // 30% smaller hitbox for golden
+        window.gameSettings.clickTargetSize;
+    
+    const animationDuration = isGolden ?
+        (window.gameSettings.slowMotion ? '6s' : '2s') : // 2x faster for golden
+        (window.gameSettings.slowMotion ? '12s' : '4s');
+    
     const wrapper = DOM.create('div', {
         className: 'baseball-wrapper' + (isGolden ? ' golden-baseball' : ''),
         style: {
-            width: window.gameSettings.clickTargetSize + 'px',
-            height: window.gameSettings.clickTargetSize + 'px',
+            width: hitboxSize + 'px',
+            height: hitboxSize + 'px',
             top: Random.between(40, 70) + '%',
             left: '-150px',
-            animation: `baseballThrow ${window.gameSettings.slowMotion ? '12s' : '4s'} linear forwards`
+            animation: `baseballThrow ${animationDuration} linear forwards`
         }
     });
     
@@ -149,13 +158,17 @@ function createBaseball() {
     gameContainer.appendChild(wrapper);
     
     // Remove baseball after it crosses screen (if not clicked)
+    const removalDelay = isGolden ?
+        (window.gameSettings.slowMotion ? 6000 : 2000) : // Match the faster animation
+        (window.gameSettings.slowMotion ? 12000 : 4000);
+        
     setTimeout(() => {
         if (wrapper.parentNode && !isClicked) {
             DOM.remove(wrapper);
             // Reset streak if missed (ball went off screen)
             resetStreak();
         }
-    }, window.gameSettings.slowMotion ? 12000 : 4000);
+    }, removalDelay);
 }
 
 // Check for streak milestones
