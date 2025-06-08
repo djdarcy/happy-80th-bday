@@ -16,10 +16,10 @@ function createStarMessage(message, isEvent = false) {
     currentMessage = message.toUpperCase();
     
     const container = document.getElementById('starMessageContainer');
-    const charWidth = 5; // Adjusted to 5 (was 4, originally 6)
-    const charHeight = 8; // 7 pixels + 1 space
-    const scale = window.innerWidth < 768 ? 2 : 2.5; // Slightly larger than before
-    const spaceWidth = 3; // Space between words
+    const charWidth = 5;
+    const charHeight = 8;
+    const scale = window.innerWidth < 768 ? 2 : 2.5;
+    const spaceWidth = 3;
     
     // Calculate total width needed with variable spacing
     let totalWidth = 0;
@@ -35,8 +35,16 @@ function createStarMessage(message, isEvent = false) {
     const needsScrolling = totalWidth > window.innerWidth * 0.9;
     
     // Starting position
-    let startX = needsScrolling ? window.innerWidth + 50 : (window.innerWidth - totalWidth) / 2;
+    let startX;
     const startY = containerRect.top + (containerRect.height - (charHeight * scale)) / 2;
+    
+    if (needsScrolling) {
+        // For scrolling messages, start with the beginning of the message visible
+        startX = 20; // Start 20px from the left edge
+    } else {
+        // Center non-scrolling messages
+        startX = (window.innerWidth - totalWidth) / 2;
+    }
     
     // Create a container div for all stars if scrolling
     let scrollContainer = null;
@@ -106,29 +114,41 @@ function createStarMessage(message, isEvent = false) {
     
     // If scrolling is needed, animate the container
     if (needsScrolling && scrollContainer) {
-        const scrollDuration = Math.max(15000, totalWidth * 15); // Adjust speed based on length
         let scrollAnimation = null;
         let startTime = null;
         
-        function animateScroll(timestamp) {
-            if (!startTime) startTime = timestamp;
-            const progress = (timestamp - startTime) / scrollDuration;
-            
-            // Calculate position for seamless loop
-            const totalDistance = totalWidth + window.innerWidth + 100;
-            const currentPosition = (progress % 1) * totalDistance;
-            const translateX = window.innerWidth - currentPosition;
-            
-            scrollContainer.style.transform = `translateX(${translateX}px)`;
-            
-            // Continue animation
-            scrollAnimation = requestAnimationFrame(animateScroll);
-        }
+        // Calculate scroll parameters
+        const visibleWidth = window.innerWidth;
+        const scrollDistance = totalWidth + visibleWidth + 100; // Total distance to scroll
+        const scrollDuration = Math.max(10000, totalWidth * 10); // Adjust speed based on length
         
-        // Start scrolling after fade-in
+        // Wait for fade-in to complete before starting scroll
         setTimeout(() => {
+            function animateScroll(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+                const progress = (elapsed / scrollDuration) % 1;
+                
+                // Calculate position for seamless loop
+                // Start at 20px, move left until completely off screen, then loop
+                const currentPosition = 20 - (progress * scrollDistance);
+                
+                // If message has scrolled completely off screen, reset to start from right
+                let translateX = currentPosition;
+                if (currentPosition < -totalWidth - 50) {
+                    // Reset to start from right side
+                    const loopProgress = (currentPosition + totalWidth + 50) / scrollDistance;
+                    translateX = visibleWidth + (loopProgress * scrollDistance);
+                }
+                
+                scrollContainer.style.transform = `translateX(${translateX}px)`;
+                
+                // Continue animation
+                scrollAnimation = requestAnimationFrame(animateScroll);
+            }
+            
             scrollAnimation = requestAnimationFrame(animateScroll);
-        }, 1000);
+        }, 1500); // Start scrolling after 1.5 seconds (fade-in time)
         
         // Store animation reference for cleanup
         scrollContainer.scrollAnimation = scrollAnimation;
