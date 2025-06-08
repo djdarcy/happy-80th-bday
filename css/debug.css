@@ -1,0 +1,26 @@
+/* Debug Mode Styles */
+.debug-mode .baseball-wrapper {
+    background: rgba(255, 0, 0, 0.3) !important;
+    border: 2px solid red !important;
+}
+
+/* Click Location Markers */
+.click-marker {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    border: 2px solid;
+}
+
+.click-marker.hit {
+    background: lime;
+    border-color: green;
+}
+
+.click-marker.miss {
+    background: red;
+    border-color: darkred;
+}

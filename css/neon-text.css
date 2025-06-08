@@ -1,0 +1,72 @@
+/* Neon Text Base Styles */
+.neon-text {
+    font-size: 4rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 20px 0;
+    position: relative;
+    animation: neonGlow 2s ease-in-out infinite alternate;
+}
+
+/* Happy Text */
+.happy {
+    color: #ff6600;
+    text-shadow: 
+        0 0 5px #ff6600,
+        0 0 10px #ff6600,
+        0 0 20px #ff6600,
+        0 0 40px #ff6600;
+}
+
+/* Birthday Text */
+.birthday {
+    color: #0066cc;
+    text-shadow: 
+        0 0 5px #0066cc,
+        0 0 10px #0066cc,
+        0 0 20px #0066cc,
+        0 0 40px #0066cc;
+}
+
+/* Steve Text */
+.steve {
+    color: #ff6600;
+    text-shadow: 
+        0 0 5px #ff6600,
+        0 0 10px #ff6600,
+        0 0 20px #ff6600,
+        0 0 40px #ff6600;
+}
+
+/* Number (80th) */
+.number {
+    font-size: 6rem;
+    color: #ffffff;
+    text-shadow: 
+        0 0 5px #ffffff,
+        0 0 10px #ffffff,
+        0 0 20px #ffffff,
+        0 0 40px #ffffff;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+    .neon-text {
+        font-size: 2.5rem;
+    }
+    .number {
+        font-size: 4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .neon-text {
+        font-size: 2rem;
+        margin: 10px 0;
+    }
+    .number {
+        font-size: 3rem;
+    }
+}

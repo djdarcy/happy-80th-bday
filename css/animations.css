@@ -1,0 +1,226 @@
+/* Animation Keyframes */
+
+/* Baseball Animations */
+@keyframes baseballThrow {
+    0% {
+        transform: translateX(-50px) translateY(10vh);
+        opacity: 1;
+    }
+    25% {
+        transform: translateX(25vw) translateY(-10vh);
+    }
+    50% {
+        transform: translateX(50vw) translateY(-15vh);
+    }
+    75% {
+        transform: translateX(75vw) translateY(-10vh);
+    }
+    100% {
+        transform: translateX(calc(100vw + 50px)) translateY(10vh);
+        opacity: 0;
+    }
+}
+
+@keyframes baseballThrowVisual {
+    0% {
+        font-size: 20px;
+    }
+    50% {
+        font-size: 35px;
+    }
+    100% {
+        font-size: 20px;
+    }
+}
+
+@keyframes homerunToStar {
+    0% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+        filter: brightness(1);
+    }
+    30% {
+        transform: translate(-50%, -50%) scale(0.8) translateY(-20vh) rotate(180deg);
+        filter: brightness(1.5);
+    }
+    60% {
+        transform: translate(-50%, -50%) scale(0.4) translateY(-40vh) rotate(360deg);
+        filter: brightness(2) blur(1px);
+    }
+    80% {
+        transform: translate(-50%, -50%) scale(0.2) translateY(-55vh) rotate(540deg);
+        opacity: 0.8;
+        filter: brightness(3) blur(2px);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(0.05) translateY(-65vh) rotate(720deg);
+        opacity: 0;
+        filter: brightness(4) blur(3px);
+    }
+}
+
+/* Star Animations */
+@keyframes twinkle {
+    0% { 
+        opacity: 0.3; 
+        transform: scale(1); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1.2); 
+    }
+}
+
+@keyframes starBirth {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+        box-shadow: 0 0 20px #ffff88;
+    }
+    50% {
+        transform: scale(3);
+        opacity: 1;
+        box-shadow: 0 0 30px #ffff88;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+        box-shadow: 0 0 6px #ffff88;
+    }
+}
+
+@keyframes messagePulse {
+    0%, 100% { 
+        opacity: 0.6; 
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 1; 
+        transform: scale(1.3);
+    }
+}
+
+/* Explosion Effects */
+@keyframes sparkFly {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--endX), var(--endY)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Text Animations */
+@keyframes neonGlow {
+    0% {
+        filter: brightness(1);
+        transform: scale(1);
+    }
+    100% {
+        filter: brightness(1.2);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes instructionGlow {
+    0% { 
+        opacity: 0.7; 
+    }
+    100% { 
+        opacity: 1; 
+    }
+}
+
+/* Border and Container Animations */
+@keyframes borderGlow {
+    0% {
+        box-shadow: 
+            0 0 20px rgba(0, 102, 204, 0.3),
+            inset 0 0 20px rgba(0, 102, 204, 0.1);
+    }
+    100% {
+        box-shadow: 
+            0 0 30px rgba(0, 102, 204, 0.6),
+            inset 0 0 30px rgba(0, 102, 204, 0.2);
+    }
+}
+
+@keyframes videoGlow {
+    0% {
+        box-shadow: 
+            0 0 50px rgba(255, 102, 0, 0.5),
+            0 0 100px rgba(0, 102, 204, 0.5);
+    }
+    100% {
+        box-shadow: 
+            0 0 70px rgba(255, 102, 0, 0.8),
+            0 0 120px rgba(0, 102, 204, 0.8);
+    }
+}
+
+/* Confetti Animation */
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Mets Win Celebration */
+@keyframes metsWin {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    25% {
+        transform: scale(1.2) rotate(5deg);
+    }
+    50% {
+        transform: scale(1) rotate(-5deg);
+    }
+    75% {
+        transform: scale(1.2) rotate(5deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.mets-win-celebration {
+    animation: metsWin 1s ease-in-out 3;
+}
+
+/* Fade Out Animation */
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
