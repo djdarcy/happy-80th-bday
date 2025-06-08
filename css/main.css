@@ -77,6 +77,16 @@ body {
     margin-top: 5px;
 }
 
+.streak {
+    font-size: 0.9rem;
+    color: #ffdd44;
+    margin-top: 3px;
+    text-shadow: 
+        0 0 5px #ffdd44,
+        0 0 10px #ff6600;
+    animation: pulse 1s ease-in-out infinite;
+}
+
 /* Game Instructions */
 .game-instructions {
     color: #0066cc;
@@ -122,6 +132,16 @@ body {
         1px 1px 0 #000,
         0 0 10px #ff0000,
         0 0 15px #880000;
+}
+
+/* Star Message Container */
+.star-message-container {
+    position: relative;
+    height: 40px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Music Container */
@@ -269,6 +289,10 @@ body {
     .total-score {
         font-size: 0.8rem;
     }
+    .star-message-container {
+        height: 35px;
+        margin-bottom: 15px;
+    }
     .music-container {
         margin: 10px;
         padding: 15px;
@@ -299,6 +323,10 @@ body {
     }
     .top-section, .bottom-section {
         padding: 10px;
+    }
+    .star-message-container {
+        height: 30px;
+        margin-bottom: 10px;
     }
     .music-container {
         margin: 10px 5px;

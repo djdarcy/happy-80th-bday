@@ -78,6 +78,12 @@
     animation: homerunToStar 2s ease-out forwards !important;
 }
 
+/* Golden Baseball */
+.golden-baseball .baseball-visual {
+    filter: hue-rotate(45deg) brightness(1.5);
+    text-shadow: 0 0 10px #ffdd44;
+}
+
 /* Stars Background Container */
 .stars {
     position: fixed;

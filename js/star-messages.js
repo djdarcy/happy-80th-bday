@@ -58,30 +58,16 @@ function createStarMessage(message, isEvent = false) {
     messageStars = [];
     currentMessage = message.toUpperCase();
     
-    const starsContainer = document.getElementById('stars');
+    const container = document.getElementById('starMessageContainer');
     const charWidth = 6; // 5 pixels + 1 space
     const charHeight = 8; // 7 pixels + 1 space
     const scale = window.innerWidth < 768 ? 2.5 : 3; // Smaller on mobile
     
     // Calculate total width needed
     const totalWidth = message.length * charWidth * scale;
+    const containerRect = container.getBoundingClientRect();
     const startX = (window.innerWidth - totalWidth) / 2;
-    
-    // Position based on screen size
-    let startY;
-    if (window.innerWidth < 768) {
-        // Mobile: Position above music container
-        const musicContainer = document.querySelector('.music-container');
-        if (musicContainer) {
-            const rect = musicContainer.getBoundingClientRect();
-            startY = rect.top - (charHeight * scale) - 20;
-        } else {
-            startY = window.innerHeight * 0.5;
-        }
-    } else {
-        // Desktop: Position at top
-        startY = 20;
-    }
+    const startY = containerRect.top + (containerRect.height - (charHeight * scale)) / 2;
     
     // Create stars for each character with fade-in animation
     for (let charIndex = 0; charIndex < message.length; charIndex++) {
@@ -102,7 +88,7 @@ function createStarMessage(message, isEvent = false) {
                             }
                         });
                         
-                        starsContainer.appendChild(star);
+                        document.body.appendChild(star);
                         messageStars.push(star);
                         
                         // Fade in with twinkle
