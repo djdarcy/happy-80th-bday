@@ -42,7 +42,8 @@
             top: -25px;
             left: -25px;
             cursor: pointer;
-            z-index: 25;
+            z-index: 100;  /* Increased from 25 to ensure it's on top */
+            pointer-events: auto !important;  /* Force pointer events */
             /* Uncomment to debug click area */
             /* background: rgba(255, 0, 0, 0.2); */
             /* border: 1px solid red; */
@@ -576,16 +577,32 @@
             // Create larger invisible click target
             const clickTarget = document.createElement('div');
             clickTarget.className = 'click-target';
+            clickTarget.style.width = clickTargetSize + 'px';
+            clickTarget.style.height = clickTargetSize + 'px';
+            clickTarget.style.top = -(clickTargetSize - 30) / 2 + 'px';
+            clickTarget.style.left = -(clickTargetSize - 30) / 2 + 'px';
+            clickTarget.style.position = 'absolute';
+            clickTarget.style.cursor = 'pointer';
+            clickTarget.style.zIndex = '100';
+            clickTarget.style.pointerEvents = 'auto';
+            
+            // Apply debug styles if debug mode is on
+            if (debugMode) {
+                clickTarget.style.background = 'rgba(255, 0, 0, 0.3)';
+                clickTarget.style.border = '2px solid red';
+            }
             
             // Create the visual emoji
             const baseballVisual = document.createElement('div');
             baseballVisual.className = 'baseball-visual';
             baseballVisual.textContent = '⚾';
+            baseballVisual.style.pointerEvents = 'none'; // Ensure visual doesn't block clicks
             
             // Alternative CSS baseball (uncomment to use instead of emoji)
             /*
             const baseballVisual = document.createElement('div');
             baseballVisual.className = 'baseball-css';
+            baseballVisual.style.pointerEvents = 'none';
             */
             
             baseball.appendChild(clickTarget);
@@ -594,6 +611,11 @@
             // Position in the game area (50-80% height range)
             baseball.style.top = (50 + Math.random() * 30) + '%';
             baseball.style.left = '-50px';
+            
+            // Apply slow motion if enabled
+            if (slowMotion) {
+                baseball.style.animationDuration = '12s';
+            }
             
             let isClicked = false;
             
@@ -604,6 +626,18 @@
                 
                 if (isClicked) return;
                 isClicked = true;
+                
+                // Show successful hit location
+                if (showClickLocations) {
+                    showClickLocation(e.clientX, e.clientY, true);
+                }
+                
+                console.log('Home run! Baseball clicked at:', {
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    targetClass: e.target.className,
+                    currentTarget: e.currentTarget.className
+                });
                 
                 score++;
                 document.getElementById('scoreDisplay').textContent = `Home Runs: ${score}`;
@@ -636,8 +670,14 @@
             };
             
             // Add event listeners for both click and touch
-            clickTarget.addEventListener('click', handleHit);
-            clickTarget.addEventListener('touchstart', handleHit);
+            clickTarget.addEventListener('click', handleHit, true); // Use capture phase
+            clickTarget.addEventListener('touchstart', handleHit, true);
+            
+            // Additional pointer events for better compatibility
+            clickTarget.addEventListener('pointerdown', handleHit, true);
+            
+            // Debug: Log when baseball is created
+            console.log('Baseball created with click target size:', clickTargetSize, 'z-index:', clickTarget.style.zIndex);
             
             gameContainer.appendChild(baseball);
             
@@ -771,6 +811,143 @@
             }
         }
         
+        // Debug variables
+        let debugMode = false;
+        let clickTargetSize = 80;
+        let showClickLocations = false;
+        let pauseBaseballs = false;
+        let slowMotion = false;
+        
+        // Debug functions
+        function toggleDebug() {
+            debugMode = !debugMode;
+            document.querySelectorAll('.click-target').forEach(target => {
+                if (debugMode) {
+                    target.style.background = 'rgba(255, 0, 0, 0.3)';
+                    target.style.border = '2px solid red';
+                } else {
+                    target.style.background = '';
+                    target.style.border = '';
+                }
+            });
+            console.log('Debug mode:', debugMode ? 'ON' : 'OFF');
+        }
+        
+        function adjustClickTargetSize(delta) {
+            clickTargetSize += delta;
+            clickTargetSize = Math.max(30, Math.min(200, clickTargetSize));
+            document.querySelectorAll('.click-target').forEach(target => {
+                target.style.width = clickTargetSize + 'px';
+                target.style.height = clickTargetSize + 'px';
+                target.style.top = -(clickTargetSize - 30) / 2 + 'px';
+                target.style.left = -(clickTargetSize - 30) / 2 + 'px';
+            });
+            console.log('Click target size:', clickTargetSize);
+        }
+        
+        function showClickLocation(x, y, hit) {
+            if (!showClickLocations) return;
+            
+            const marker = document.createElement('div');
+            marker.style.position = 'absolute';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+            marker.style.width = '10px';
+            marker.style.height = '10px';
+            marker.style.borderRadius = '50%';
+            marker.style.background = hit ? 'lime' : 'red';
+            marker.style.border = '2px solid ' + (hit ? 'green' : 'darkred');
+            marker.style.pointerEvents = 'none';
+            marker.style.zIndex = '9999';
+            document.body.appendChild(marker);
+            
+            setTimeout(() => marker.remove(), 2000);
+        }
+        
+        // Debug keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // CTRL+ALT+SHIFT+D: Toggle debug mode
+            if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'D') {
+                e.preventDefault();
+                toggleDebug();
+            }
+            // CTRL+ALT+SHIFT+J: Make click target bigger
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+                adjustClickTargetSize(20);
+            }
+            // CTRL+ALT+SHIFT+K: Make click target smaller
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'K') {
+                e.preventDefault();
+                adjustClickTargetSize(-20);
+            }
+            // CTRL+ALT+SHIFT+C: Show click locations
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                showClickLocations = !showClickLocations;
+                console.log('Show click locations:', showClickLocations ? 'ON' : 'OFF');
+            }
+            // CTRL+ALT+SHIFT+P: Pause baseball generation
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'P') {
+                e.preventDefault();
+                pauseBaseballs = !pauseBaseballs;
+                console.log('Baseball generation:', pauseBaseballs ? 'PAUSED' : 'RUNNING');
+            }
+            // CTRL+ALT+SHIFT+S: Slow motion mode
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'S') {
+                e.preventDefault();
+                slowMotion = !slowMotion;
+                document.querySelectorAll('.baseball').forEach(baseball => {
+                    baseball.style.animationDuration = slowMotion ? '12s' : '4s';
+                });
+                console.log('Slow motion:', slowMotion ? 'ON' : 'OFF');
+            }
+            // CTRL+ALT+SHIFT+L: Log all active baseballs
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'L') {
+                e.preventDefault();
+                const baseballs = document.querySelectorAll('.baseball');
+                console.log('Active baseballs:', baseballs.length);
+                baseballs.forEach((b, i) => {
+                    const rect = b.getBoundingClientRect();
+                    const clickTarget = b.querySelector('.click-target');
+                    const targetRect = clickTarget ? clickTarget.getBoundingClientRect() : null;
+                    console.log(`Baseball ${i}:`, {
+                        baseball: {
+                            left: rect.left,
+                            top: rect.top,
+                            width: rect.width,
+                            height: rect.height,
+                            zIndex: window.getComputedStyle(b).zIndex
+                        },
+                        clickTarget: targetRect ? {
+                            left: targetRect.left,
+                            top: targetRect.top,
+                            width: targetRect.width,
+                            height: targetRect.height,
+                            zIndex: window.getComputedStyle(clickTarget).zIndex,
+                            pointerEvents: window.getComputedStyle(clickTarget).pointerEvents
+                        } : 'No click target found'
+                    });
+                });
+            }
+            // CTRL+ALT+SHIFT+Z: Check z-index stacking
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'Z') {
+                e.preventDefault();
+                console.log('Z-index analysis:');
+                const elements = document.querySelectorAll('*');
+                const zIndexed = Array.from(elements)
+                    .map(el => ({
+                        element: el,
+                        className: el.className,
+                        zIndex: window.getComputedStyle(el).zIndex
+                    }))
+                    .filter(item => item.zIndex !== 'auto' && item.zIndex !== '0')
+                    .sort((a, b) => parseInt(b.zIndex) - parseInt(a.zIndex));
+                
+                console.table(zIndexed.slice(0, 20)); // Show top 20 z-indexed elements
+            }
+        });
+        
         // Initialize animations when page loads
         window.addEventListener('load', function() {
             createStars();
@@ -780,13 +957,23 @@
             updateMetsStats();
             
             // Start baseball game with staggered timing
+            let baseballInterval;
             setTimeout(() => {
                 createBaseball();
-                setInterval(createBaseball, 2500 + Math.random() * 1000);
+                baseballInterval = setInterval(() => {
+                    if (!pauseBaseballs) {
+                        createBaseball();
+                    }
+                }, 2500 + Math.random() * 1000);
             }, 1000);
             
             // Add sparkle effect on background clicks
             document.addEventListener('click', function(e) {
+                // Show click location in debug mode
+                if (showClickLocations) {
+                    showClickLocation(e.clientX, e.clientY, false);
+                }
+                
                 // Don't create sparkles on interactive elements
                 if (e.target.classList.contains('click-target') || 
                     e.target.tagName === 'IFRAME' ||
@@ -811,6 +998,17 @@
                     sparkle.remove();
                 }, 500);
             });
+            
+            // Log debug instructions
+            console.log('Debug shortcuts available:');
+            console.log('CTRL+ALT+SHIFT+D - Toggle debug mode (show click targets)');
+            console.log('CTRL+ALT+SHIFT+J - Make click targets bigger');
+            console.log('CTRL+ALT+SHIFT+K - Make click targets smaller');
+            console.log('CTRL+ALT+SHIFT+C - Show click locations');
+            console.log('CTRL+ALT+SHIFT+P - Pause baseball generation');
+            console.log('CTRL+ALT+SHIFT+S - Slow motion mode');
+            console.log('CTRL+ALT+SHIFT+L - Log all active baseballs');
+            console.log('CTRL+ALT+SHIFT+Z - Analyze z-index stacking');
         });
         
         // Add visibility API to pause/resume when tab is not visible
