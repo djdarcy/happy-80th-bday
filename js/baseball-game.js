@@ -45,7 +45,7 @@ function createBaseball() {
         window.gameSettings.clickTargetSize;
     
     const animationDuration = isGolden ?
-        (window.gameSettings.slowMotion ? '6s' : '2s') : // 2x faster for golden
+        (window.gameSettings.slowMotion ? '6.9s' : '2.3s') : // 1.75x faster for golden (4/1.75 = 2.3)
         (window.gameSettings.slowMotion ? '12s' : '4s');
     
     const wrapper = DOM.create('div', {
@@ -147,7 +147,7 @@ function createBaseball() {
     
     // Remove baseball after it crosses screen (if not clicked)
     const removalDelay = isGolden ?
-        (window.gameSettings.slowMotion ? 6000 : 2000) : // Match the faster animation
+        (window.gameSettings.slowMotion ? 6900 : 2300) : // Match the faster animation
         (window.gameSettings.slowMotion ? 12000 : 4000);
         
     setTimeout(() => {
@@ -161,6 +161,9 @@ function createBaseball() {
 
 // Check for streak milestones
 function checkStreakMilestones() {
+    // Only check milestones if we have a valid streak
+    if (streak <= 0) return;
+    
     // Find the highest milestone we've reached
     let currentMilestone = 0;
     for (let milestone in streakMilestones) {
@@ -169,7 +172,7 @@ function checkStreakMilestones() {
         }
     }
     
-    // Only show message if this is a new milestone we haven't shown yet
+    // Only show message if this is a new milestone we haven't shown yet for this streak
     if (currentMilestone > lastStreakMilestone) {
         lastStreakMilestone = currentMilestone;
         createStarMessage(streakMilestones[currentMilestone], true);
@@ -254,15 +257,23 @@ function handleMissClick(e) {
         clickedElement.closest('.music-container') ||
         clickedElement.closest('.video-overlay') ||
         clickedElement.closest('button') ||
-        clickedElement.id === 'musicPrompt') {
+        clickedElement.id === 'musicPrompt' ||
+        clickedElement.closest('.score-display') ||
+        clickedElement.closest('.neon-text') ||
+        clickedElement.closest('.mets-info')) {
+        return;
+    }
+    
+    // Check if there are any baseballs on screen
+    const baseballs = document.querySelectorAll('.baseball-wrapper');
+    if (baseballs.length === 0) {
+        // No baseballs on screen, so this isn't really a miss
         return;
     }
     
     // This was a swing and a miss!
-    if (streak > 0) {
-        console.log('Swing and a miss! Streak broken.');
-        resetStreak();
-    }
+    console.log('Swing and a miss! Streak broken.');
+    resetStreak();
     
     // Show miss location in debug mode
     if (window.gameSettings.showClickLocations) {
