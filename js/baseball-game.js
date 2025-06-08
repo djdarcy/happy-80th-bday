@@ -3,9 +3,10 @@
 // Game state variables
 let score = 0;
 let totalHomeRuns = 0;
-let hasShownTenHomeRunVideo = false;
+let hasShownStreakVideo = false;
 let streak = 0;
 let bestStreak = 0;
+let lastStreakMilestone = 0; // Track which milestone we last showed
 
 // Milestone messages for streaks
 const streakMilestones = {
@@ -25,8 +26,21 @@ function resetStreak(showMessage = true) {
             console.log(`Streak ended at ${streak}`);
         }
         streak = 0;
+        lastStreakMilestone = 0; // Reset milestone tracker
         updateScoreDisplay();
     }
+}
+
+// Check if we've already shown the video this session
+function hasShownVideoThisSession() {
+    // Use sessionStorage instead of localStorage so it resets when browser closes
+    return sessionStorage.getItem('streakVideoShown') === 'true';
+}
+
+// Mark that we've shown the video this session
+function markVideoShown() {
+    sessionStorage.setItem('streakVideoShown', 'true');
+    hasShownStreakVideo = true;
 }
 
 // Baseball mini-game with improved click detection
@@ -97,14 +111,6 @@ function createBaseball() {
         updateScoreDisplay();
         Storage.setNumber('totalHomeRuns', totalHomeRuns);
         
-        // Check for 10 home runs celebration
-        if (score >= 10 && !hasShownTenHomeRunVideo) {
-            hasShownTenHomeRunVideo = true;
-            setTimeout(() => {
-                showCelebrationVideo();
-            }, 1000);
-        }
-        
         // Get current position for effects
         const rect = wrapper.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
@@ -154,11 +160,30 @@ function createBaseball() {
 
 // Check for streak milestones
 function checkStreakMilestones() {
-    if (streakMilestones[streak]) {
-        createStarMessage(streakMilestones[streak], true);
+    // Find the highest milestone we've reached
+    let currentMilestone = 0;
+    for (let milestone in streakMilestones) {
+        if (streak >= parseInt(milestone) && parseInt(milestone) > currentMilestone) {
+            currentMilestone = parseInt(milestone);
+        }
+    }
+    
+    // Only show message if this is a new milestone we haven't shown yet
+    if (currentMilestone > lastStreakMilestone) {
+        lastStreakMilestone = currentMilestone;
+        createStarMessage(streakMilestones[currentMilestone], true);
+        
+        // Check for 10-hit streak video celebration
+        if (currentMilestone === 10 && !hasShownVideoThisSession()) {
+            console.log('10-hit streak achieved! Showing celebration video...');
+            setTimeout(() => {
+                showCelebrationVideo();
+                markVideoShown();
+            }, 1000);
+        }
         
         // Extra celebration for big streaks
-        if (streak >= 20) {
+        if (currentMilestone >= 20) {
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
                     createVictoryConfetti();
@@ -249,6 +274,10 @@ function initializeGame() {
     // Load saved values
     totalHomeRuns = Storage.getNumber('totalHomeRuns', 0);
     bestStreak = Storage.getNumber('bestStreak', 0);
+    
+    // Check if video was shown this session
+    hasShownStreakVideo = hasShownVideoThisSession();
+    
     updateScoreDisplay();
     
     // Add global click handler for miss detection
