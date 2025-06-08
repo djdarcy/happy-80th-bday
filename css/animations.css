@@ -1,35 +1,38 @@
-/* Animation Keyframes */
+/* Animation Keyframes - Optimized for Performance */
+
+/* Use transform and opacity for better performance */
+/* Avoid animating properties that trigger layout recalculation */
 
 /* Baseball Animations */
 @keyframes baseballThrow {
     0% {
-        transform: translateX(-50px) translateY(10vh);
+        transform: translate3d(-50px, 10vh, 0);
         opacity: 1;
     }
     25% {
-        transform: translateX(25vw) translateY(-10vh);
+        transform: translate3d(25vw, -10vh, 0);
     }
     50% {
-        transform: translateX(50vw) translateY(-15vh);
+        transform: translate3d(50vw, -15vh, 0);
     }
     75% {
-        transform: translateX(75vw) translateY(-10vh);
+        transform: translate3d(75vw, -10vh, 0);
     }
     100% {
-        transform: translateX(calc(100vw + 50px)) translateY(10vh);
+        transform: translate3d(calc(100vw + 50px), 10vh, 0);
         opacity: 0;
     }
 }
 
 @keyframes baseballThrowVisual {
     0% {
-        font-size: 20px;
+        transform: scale(1);
     }
     50% {
-        font-size: 35px;
+        transform: scale(1.75);
     }
     100% {
-        font-size: 20px;
+        transform: scale(1);
     }
 }
 
@@ -59,7 +62,7 @@
     }
 }
 
-/* Star Animations */
+/* Star Animations - Use will-change for frequently animated elements */
 @keyframes twinkle {
     0% { 
         opacity: 0.3; 
@@ -71,21 +74,22 @@
     }
 }
 
+.star {
+    will-change: transform, opacity;
+}
+
 @keyframes starBirth {
     0% {
         transform: scale(0);
         opacity: 0;
-        box-shadow: 0 0 20px #ffff88;
     }
     50% {
         transform: scale(3);
         opacity: 1;
-        box-shadow: 0 0 30px #ffff88;
     }
     100% {
         transform: scale(1);
         opacity: 0.8;
-        box-shadow: 0 0 6px #ffff88;
     }
 }
 
@@ -112,7 +116,7 @@
     }
 }
 
-/* Text Animations */
+/* Text Animations - Simplified for performance */
 @keyframes neonGlow {
     0% {
         filter: brightness(1);
@@ -153,7 +157,7 @@
     }
 }
 
-/* Border and Container Animations */
+/* Border and Container Animations - Use transform for better performance */
 @keyframes borderGlow {
     0% {
         box-shadow: 
@@ -180,16 +184,20 @@
     }
 }
 
-/* Confetti Animation */
+/* Confetti Animation - Use GPU acceleration */
 @keyframes confettiFall {
     0% {
-        transform: translateY(-100vh) rotate(0deg);
+        transform: translate3d(0, -100vh, 0) rotate(0deg);
         opacity: 1;
     }
     100% {
-        transform: translateY(100vh) rotate(360deg);
+        transform: translate3d(0, 100vh, 0) rotate(360deg);
         opacity: 0;
     }
+}
+
+.confetti {
+    will-change: transform;
 }
 
 /* Mets Win Celebration */
@@ -222,5 +230,17 @@
     }
     100% {
         opacity: 0;
+    }
+}
+
+/* Star Message Appear - Optimized */
+@keyframes starMessageAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
