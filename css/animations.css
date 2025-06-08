@@ -1,6 +1,6 @@
 /* Animation Keyframes */
 
-/* Baseball Animations */
+/* Baseball Animations - Left to Right */
 @keyframes baseballThrow {
     0% {
         transform: translateX(-50px) translateY(10vh);
@@ -17,6 +17,27 @@
     }
     100% {
         transform: translateX(calc(100vw + 50px)) translateY(10vh);
+        opacity: 0;
+    }
+}
+
+/* Baseball Animations - Right to Left */
+@keyframes baseballThrowReverse {
+    0% {
+        transform: translateX(50px) translateY(10vh);
+        opacity: 1;
+    }
+    25% {
+        transform: translateX(-25vw) translateY(-10vh);
+    }
+    50% {
+        transform: translateX(-50vw) translateY(-15vh);
+    }
+    75% {
+        transform: translateX(-75vw) translateY(-10vh);
+    }
+    100% {
+        transform: translateX(calc(-100vw - 50px)) translateY(10vh);
         opacity: 0;
     }
 }
@@ -222,5 +243,17 @@
     }
     100% {
         opacity: 0;
+    }
+}
+
+/* Star Message Appear */
+@keyframes starMessageAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }

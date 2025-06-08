@@ -38,6 +38,9 @@ function createBaseball() {
     // Occasionally create a special golden baseball
     const isGolden = Random.between(0, 100) < 5; // 5% chance
     
+    // Randomly choose left or right side
+    const fromLeft = Random.between(0, 100) < 50; // 50/50 chance
+    
     // Create wrapper div that will handle clicks
     // Golden baseballs have smaller hitbox and move faster
     const hitboxSize = isGolden ? 
@@ -48,14 +51,17 @@ function createBaseball() {
         (window.gameSettings.slowMotion ? '6.9s' : '2.3s') : // 1.75x faster for golden (4/1.75 = 2.3)
         (window.gameSettings.slowMotion ? '12s' : '4s');
     
+    // Choose animation based on direction
+    const animationName = fromLeft ? 'baseballThrow' : 'baseballThrowReverse';
+    
     const wrapper = DOM.create('div', {
         className: 'baseball-wrapper' + (isGolden ? ' golden-baseball' : ''),
         style: {
             width: hitboxSize + 'px',
             height: hitboxSize + 'px',
             top: Random.between(40, 70) + '%',
-            left: '-150px',
-            animation: `baseballThrow ${animationDuration} linear forwards`
+            left: fromLeft ? '-150px' : 'calc(100% + 50px)',
+            animation: `${animationName} ${animationDuration} linear forwards`
         }
     });
     
@@ -96,7 +102,10 @@ function createBaseball() {
         // Update scores
         score += points;
         totalHomeRuns += points;
-        streak++;
+        streak++;  // Both regular and golden baseballs count as 1 toward streak
+        
+        console.log(`Current streak: ${streak}, Total score: ${score}`);
+        
         if (streak > bestStreak) {
             bestStreak = streak;
             Storage.setNumber('bestStreak', bestStreak);
@@ -140,7 +149,7 @@ function createBaseball() {
     
     // Debug logging
     if (window.gameSettings.debugMode) {
-        console.log('Baseball created' + (isGolden ? ' (GOLDEN!)' : ''));
+        console.log(`Baseball created ${isGolden ? '(GOLDEN!)' : ''} from ${fromLeft ? 'LEFT' : 'RIGHT'}`);
     }
     
     gameContainer.appendChild(wrapper);
