@@ -83,6 +83,15 @@
                 0 0 40px #0066cc;
         }
         
+        .steve {
+            color: #ff6600;
+            text-shadow: 
+                0 0 5px #ff6600,
+                0 0 10px #ff6600,
+                0 0 20px #ff6600,
+                0 0 40px #ff6600;
+        }
+        
         .number {
             font-size: 6rem;
             color: #ffffff;
@@ -236,6 +245,7 @@
         <div class="neon-text happy">Happy</div>
         <div class="neon-text number">80th</div>
         <div class="neon-text birthday">Birthday!</div>
+        <div class="neon-text steve">Steve!</div>
         
         <div class="mets-info">
             🧡💙 Let's Go Mets! Currently 41-24! 💙🧡
@@ -243,14 +253,10 @@
         
         <div class="music-container">
             <div class="music-title">🎵 Birthday Blues for the Mets 🎵</div>
-            <iframe 
-                width="100%" 
-                height="166" 
-                scrolling="no" 
-                frameborder="no" 
-                allow="autoplay" 
-                src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1862946476&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true">
-            </iframe>
+            <div class="soundcloud">
+                <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+                    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&inverse=false&auto_play=false&show_user=true"></iframe>
+            </div>
         </div>
     </div>
 
@@ -312,5 +318,6 @@
             });
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </body>
 </html>
