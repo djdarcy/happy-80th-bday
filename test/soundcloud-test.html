@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoundCloud Autoplay Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #ff6600;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #e55500;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .status.ready { background: #4CAF50; color: white; }
+        .status.playing { background: #2196F3; color: white; }
+        .status.paused { background: #FF9800; color: white; }
+        .status.error { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <h1>SoundCloud Autoplay Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Standard Embed with auto_play=true</h2>
+        <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&auto_play=true&show_user=true"></iframe>
+        <div class="status" id="status1">Loading...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Manual Control</h2>
+        <iframe id="widget2" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&auto_play=false&show_user=true"></iframe>
+        <div>
+            <button onclick="playWidget2()">Play</button>
+            <button onclick="pauseWidget2()">Pause</button>
+            <button onclick="checkWidget2()">Check Status</button>
+        </div>
+        <div class="status" id="status2">Loading...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Programmatic Autoplay</h2>
+        <iframe id="widget3" width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&show_user=true"></iframe>
+        <div class="status" id="status3">Loading...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Log</h2>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script src="https://w.soundcloud.com/player/api.js"></script>
+    <script>
+        // Console log capture
+        const logDiv = document.getElementById('log');
+        const originalLog = console.log;
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+            ).join(' ');
+            logDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        };
+
+        // Test 1: Check standard autoplay
+        const widget1 = SC.Widget(document.querySelector('iframe'));
+        widget1.bind(SC.Widget.Events.READY, function() {
+            console.log('Widget 1 READY');
+            document.getElementById('status1').className = 'status ready';
+            document.getElementById('status1').textContent = 'Ready';
+            
+            widget1.bind(SC.Widget.Events.PLAY, function() {
+                console.log('Widget 1 PLAYING (autoplay worked!)');
+                document.getElementById('status1').className = 'status playing';
+                document.getElementById('status1').textContent = 'Playing - Autoplay Success!';
+            });
+            
+            // Check if playing after a delay
+            setTimeout(() => {
+                widget1.isPaused(function(paused) {
+                    if (paused) {
+                        console.log('Widget 1 is paused - autoplay failed');
+                        document.getElementById('status1').className = 'status paused';
+                        document.getElementById('status1').textContent = 'Paused - Autoplay Failed';
+                    }
+                });
+            }, 1000);
+        });
+
+        // Test 2: Manual controls
+        const widget2 = SC.Widget('widget2');
+        widget2.bind(SC.Widget.Events.READY, function() {
+            console.log('Widget 2 READY');
+            document.getElementById('status2').className = 'status ready';
+            document.getElementById('status2').textContent = 'Ready';
+        });
+
+        function playWidget2() {
+            widget2.play();
+            console.log('Widget 2: play() called');
+        }
+
+        function pauseWidget2() {
+            widget2.pause();
+            console.log('Widget 2: pause() called');
+        }
+
+        function checkWidget2() {
+            widget2.isPaused(function(paused) {
+                console.log('Widget 2 paused:', paused);
+                document.getElementById('status2').className = paused ? 'status paused' : 'status playing';
+                document.getElementById('status2').textContent = paused ? 'Paused' : 'Playing';
+            });
+        }
+
+        // Test 3: Programmatic autoplay
+        const widget3 = SC.Widget('widget3');
+        widget3.bind(SC.Widget.Events.READY, function() {
+            console.log('Widget 3 READY, attempting programmatic play...');
+            document.getElementById('status3').className = 'status ready';
+            document.getElementById('status3').textContent = 'Ready';
+            
+            // Try to play immediately
+            widget3.play().then(() => {
+                console.log('Widget 3: play() promise resolved');
+                document.getElementById('status3').className = 'status playing';
+                document.getElementById('status3').textContent = 'Playing - Programmatic Success!';
+            }).catch(error => {
+                console.log('Widget 3: play() promise rejected:', error.message);
+                document.getElementById('status3').className = 'status error';
+                document.getElementById('status3').textContent = 'Autoplay Blocked - Click anywhere to play';
+                
+                // Add click handler
+                document.addEventListener('click', function playOnClick() {
+                    widget3.play();
+                    document.removeEventListener('click', playOnClick);
+                    console.log('Widget 3: Playing on user interaction');
+                }, { once: true });
+            });
+        });
+
+        // Browser info
+        console.log('Browser:', navigator.userAgent);
+        console.log('Test started at:', new Date().toLocaleString());
+    </script>
+</body>
+</html>

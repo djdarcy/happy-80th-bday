@@ -139,6 +139,43 @@ body {
     max-width: 600px;
 }
 
+/* Music click prompt - shows when music isn't playing */
+.music-click-prompt {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 102, 0, 0.95);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+    animation: promptPulse 2s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+}
+
+.music-click-prompt:hover {
+    background: rgba(255, 102, 0, 1);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+.music-click-prompt.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes promptPulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 102, 0, 0.8);
+    }
+}
+
 .music-title {
     color: #ffffff;
     font-size: 1.2rem;
@@ -243,6 +280,10 @@ body {
         font-size: 0.9rem;
         margin-bottom: 10px;
     }
+    .music-click-prompt {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -274,6 +315,10 @@ body {
     }
     .game-area {
         min-height: 150px;
+    }
+    .music-click-prompt {
+        font-size: 0.8rem;
+        padding: 6px 12px;
     }
 }
 

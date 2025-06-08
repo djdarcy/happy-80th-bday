@@ -1,6 +1,8 @@
 // SoundCloud Integration
 
 let songPlays = 0;
+let musicStarted = false;
+let widget = null;
 
 // Track song plays
 function trackSongPlay() {
@@ -17,11 +19,27 @@ function updateSongPlaysDisplay() {
     }
 }
 
+// Hide the music prompt
+function hideMusicPrompt() {
+    const prompt = document.getElementById('musicPrompt');
+    if (prompt) {
+        prompt.classList.add('hidden');
+    }
+}
+
+// Show the music prompt
+function showMusicPrompt() {
+    const prompt = document.getElementById('musicPrompt');
+    if (prompt) {
+        prompt.classList.remove('hidden');
+    }
+}
+
 // Set up SoundCloud widget for looping
 function setupSoundCloudLoop() {
     const scWidget = document.querySelector('iframe');
     if (window.SC && scWidget) {
-        const widget = SC.Widget(scWidget);
+        widget = SC.Widget(scWidget);
         
         // Wait for widget to be ready
         widget.bind(SC.Widget.Events.READY, function() {
@@ -31,7 +49,19 @@ function setupSoundCloudLoop() {
             widget.setVolume(50);
             
             // Bind event handlers
-            widget.bind(SC.Widget.Events.PLAY, trackSongPlay);
+            widget.bind(SC.Widget.Events.PLAY, function() {
+                console.log('Music started playing');
+                musicStarted = true;
+                hideMusicPrompt();
+                trackSongPlay();
+            });
+            
+            widget.bind(SC.Widget.Events.PAUSE, function() {
+                console.log('Music paused');
+                if (!musicStarted) {
+                    showMusicPrompt();
+                }
+            });
             
             // Loop the track
             widget.bind(SC.Widget.Events.FINISH, function() {
@@ -40,19 +70,32 @@ function setupSoundCloudLoop() {
                 widget.play();
             });
             
-            // Try to auto-play
+            // Try to auto-play (will likely fail in modern browsers)
             widget.play().catch(e => {
-                console.log('Autoplay was blocked. User interaction required.');
-                // Add a one-time click handler to start playback
-                document.addEventListener('click', function startPlayback() {
-                    widget.play();
-                    document.removeEventListener('click', startPlayback);
-                }, { once: true });
+                console.log('Autoplay blocked - waiting for user interaction');
             });
+            
+            // Check if playing after a short delay
+            setTimeout(() => {
+                widget.isPaused(function(paused) {
+                    if (paused && !musicStarted) {
+                        console.log('Music not playing - showing prompt');
+                        showMusicPrompt();
+                    }
+                });
+            }, 500);
         });
     } else {
         // Fallback: try again in a second
         setTimeout(setupSoundCloudLoop, 1000);
+    }
+}
+
+// Start music on user interaction
+function startMusic() {
+    if (widget && !musicStarted) {
+        widget.play();
+        hideMusicPrompt();
     }
 }
 
@@ -71,4 +114,30 @@ function initializeSoundCloud() {
     } else {
         setupSoundCloudLoop();
     }
+    
+    // Add click handlers for music prompt and first interaction
+    document.addEventListener('DOMContentLoaded', function() {
+        // Click on the prompt itself
+        const prompt = document.getElementById('musicPrompt');
+        if (prompt) {
+            prompt.addEventListener('click', function(e) {
+                e.stopPropagation();
+                startMusic();
+            });
+        }
+        
+        // First click anywhere starts music
+        document.addEventListener('click', function firstClick() {
+            if (!musicStarted && widget) {
+                startMusic();
+            }
+        });
+        
+        // First touch anywhere starts music (mobile)
+        document.addEventListener('touchstart', function firstTouch() {
+            if (!musicStarted && widget) {
+                startMusic();
+            }
+        }, { once: true });
+    });
 }
