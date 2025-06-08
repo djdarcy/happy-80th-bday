@@ -26,73 +26,53 @@
         
         .baseball {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background: #ffffff;
-            border-radius: 50%;
+            font-size: 20px;
             cursor: pointer;
             pointer-events: auto;
             z-index: 15;
-            box-shadow: 
-                0 0 10px rgba(255, 255, 255, 0.8),
-                inset -5px -5px 10px rgba(0, 0, 0, 0.3);
             animation: baseballThrow 4s linear forwards;
             transition: transform 0.1s ease;
+            user-select: none;
         }
         
         .baseball:hover {
             transform: scale(1.1);
         }
         
-        .baseball::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            right: 10%;
-            height: 2px;
-            background: #ff0000;
-            transform: translateY(-1px);
-        }
-        
-        .baseball::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 10%;
-            right: 10%;
-            height: 2px;
-            background: #ff0000;
-            transform: translateY(1px);
-        }
-        
         @keyframes baseballThrow {
             0% {
-                transform: translateX(-50px) translateY(0px) scale(0.8);
+                transform: translateX(-50px) translateY(20vh);
+                font-size: 15px;
                 opacity: 1;
             }
             25% {
-                transform: translateX(25vw) translateY(-15vh) scale(1);
+                transform: translateX(25vw) translateY(-5vh);
+                font-size: 25px;
             }
             50% {
-                transform: translateX(50vw) translateY(-20vh) scale(1.1);
+                transform: translateX(50vw) translateY(-10vh);
+                font-size: 30px;
             }
             75% {
-                transform: translateX(75vw) translateY(-15vh) scale(1);
+                transform: translateX(75vw) translateY(-5vh);
+                font-size: 25px;
             }
             100% {
-                transform: translateX(calc(100vw + 50px)) translateY(0px) scale(0.8);
+                transform: translateX(calc(100vw + 50px)) translateY(20vh);
+                font-size: 15px;
                 opacity: 0;
             }
         }
         
         @keyframes homerunBall {
             0% {
-                transform: scale(1) rotate(0deg);
+                font-size: 30px;
+                transform: rotate(0deg);
                 opacity: 1;
             }
             100% {
-                transform: translateY(-50vh) scale(0.1) rotate(720deg);
+                font-size: 8px;
+                transform: translateY(-50vh) rotate(720deg);
                 opacity: 0;
             }
         }
@@ -141,7 +121,7 @@
         
         .game-instructions {
             position: absolute;
-            bottom: 20px;
+            bottom: 220px;
             left: 50%;
             transform: translateX(-50%);
             color: #0066cc;
@@ -461,7 +441,10 @@
             const gameContainer = document.getElementById('gameContainer');
             const baseball = document.createElement('div');
             baseball.className = 'baseball';
-            baseball.style.top = (Math.random() * 40 + 30) + '%'; // Start from middle area
+            baseball.textContent = '⚾';
+            
+            // Position in the clear middle area (between title and music)
+            baseball.style.top = (40 + Math.random() * 20) + '%'; // 40-60% range for middle area
             baseball.style.left = '-50px';
             
             let isClicked = false;
