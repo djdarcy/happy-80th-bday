@@ -23,17 +23,32 @@ function setupSoundCloudLoop() {
     if (window.SC && scWidget) {
         const widget = SC.Widget(scWidget);
         
-        // Track plays
-        widget.bind(SC.Widget.Events.PLAY, trackSongPlay);
-        
-        // Loop the track
-        widget.bind(SC.Widget.Events.FINISH, function() {
-            widget.play();
-        });
-        
-        // Auto-play on load
+        // Wait for widget to be ready
         widget.bind(SC.Widget.Events.READY, function() {
-            widget.play();
+            console.log('SoundCloud widget ready');
+            
+            // Set volume
+            widget.setVolume(50);
+            
+            // Bind event handlers
+            widget.bind(SC.Widget.Events.PLAY, trackSongPlay);
+            
+            // Loop the track
+            widget.bind(SC.Widget.Events.FINISH, function() {
+                console.log('Song finished, restarting...');
+                widget.seekTo(0);
+                widget.play();
+            });
+            
+            // Try to auto-play
+            widget.play().catch(e => {
+                console.log('Autoplay was blocked. User interaction required.');
+                // Add a one-time click handler to start playback
+                document.addEventListener('click', function startPlayback() {
+                    widget.play();
+                    document.removeEventListener('click', startPlayback);
+                }, { once: true });
+            });
         });
     } else {
         // Fallback: try again in a second

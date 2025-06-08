@@ -162,6 +162,15 @@ function initializeDebug() {
                 createStarMessage(testMessage);
             }
         }
+        // CTRL+ALT+SHIFT+X: Clear all localStorage/cache
+        else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'X') {
+            e.preventDefault();
+            if (confirm('Clear all saved data? This will reset home runs, song plays, and Mets record.')) {
+                localStorage.clear();
+                console.log('All localStorage data cleared!');
+                alert('All saved data has been cleared. Refresh the page to see changes.');
+            }
+        }
     });
     
     // Log debug instructions
@@ -178,4 +187,5 @@ function initializeDebug() {
     console.log('CTRL+ALT+SHIFT+W - Check element at click point');
     console.log('CTRL+ALT+SHIFT+M - Test Mets Win celebration');
     console.log('CTRL+ALT+SHIFT+R - Test star message');
+    console.log('CTRL+ALT+SHIFT+X - Clear all saved data/cache');
 }

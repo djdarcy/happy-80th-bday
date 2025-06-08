@@ -63,7 +63,7 @@ function createStarMessage(message) {
     // Calculate total width needed
     const totalWidth = message.length * charWidth * scale;
     const startX = (window.innerWidth - totalWidth) / 2;
-    const startY = window.innerHeight * 0.15; // 15% from top
+    const startY = 20; // Fixed position at very top of screen
     
     // Create stars for each character
     for (let charIndex = 0; charIndex < message.length; charIndex++) {

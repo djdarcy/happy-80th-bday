@@ -30,10 +30,21 @@ async function updateMetsStats() {
                     const overallRecord = data.team.record.items.find(item => item.type === 'total' || item.type === 'overall');
                     if (overallRecord && overallRecord.summary) {
                         const currentRecord = overallRecord.summary;
-                        metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${currentRecord}! 💙🧡`;
                         
-                        // Check if Mets won a new game
-                        checkForMetsWin(currentRecord);
+                        // Check if Mets won a new game before updating display
+                        const winLossChange = checkForMetsWin(currentRecord);
+                        
+                        // Format the record with styled numbers
+                        const [wins, losses] = currentRecord.split('-');
+                        let formattedRecord = currentRecord;
+                        
+                        if (winLossChange === 'win') {
+                            formattedRecord = `<span class="mets-win-number">${wins}</span>-${losses}`;
+                        } else if (winLossChange === 'loss') {
+                            formattedRecord = `${wins}-<span class="mets-loss-number">${losses}</span>`;
+                        }
+                        
+                        metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${formattedRecord}! 💙🧡`;
                         
                         console.log('Successfully fetched Mets stats from ESPN');
                         return;
@@ -82,16 +93,26 @@ function checkForMetsWin(currentRecord) {
     const [currentWins, currentLosses] = currentRecord.split('-').map(n => parseInt(n));
     const [lastWins, lastLosses] = lastMetsRecord.split('-').map(n => parseInt(n));
     
+    let changeType = null;
+    
     if (currentWins > lastWins) {
         // Mets won a game!
+        changeType = 'win';
         celebrateMetsWin();
         Storage.set('lastMetsRecord', currentRecord);
         lastMetsRecord = currentRecord;
+    } else if (currentLosses > lastLosses) {
+        // Mets lost a game
+        changeType = 'loss';
+        Storage.set('lastMetsRecord', currentRecord);
+        lastMetsRecord = currentRecord;
     } else if (currentWins !== lastWins || currentLosses !== lastLosses) {
-        // Record changed but not a win
+        // Record changed but not a simple win/loss
         Storage.set('lastMetsRecord', currentRecord);
         lastMetsRecord = currentRecord;
     }
+    
+    return changeType;
 }
 
 // Celebrate when Mets win

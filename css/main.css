@@ -99,6 +99,31 @@ body {
     animation: fadeInUp 3s ease-out;
 }
 
+/* Win/Loss number styling */
+.mets-win-number {
+    font-weight: bold;
+    color: #00ff00;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 10px #00ff00,
+        0 0 15px #008800;
+}
+
+.mets-loss-number {
+    font-weight: bold;
+    color: #ff3333;
+    text-shadow: 
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 10px #ff0000,
+        0 0 15px #880000;
+}
+
 /* Music Container */
 .music-container {
     margin: 20px auto;
