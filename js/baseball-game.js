@@ -18,6 +18,17 @@ const streakMilestones = {
     30: "30 hit streak! GOAT! 🐐🔥"
 };
 
+// Reset streak with optional message
+function resetStreak(showMessage = true) {
+    if (streak > 0) {
+        if (showMessage) {
+            console.log(`Streak ended at ${streak}`);
+        }
+        streak = 0;
+        updateScoreDisplay();
+    }
+}
+
 // Baseball mini-game with improved click detection
 function createBaseball() {
     const gameContainer = document.getElementById('gameContainer');
@@ -102,7 +113,7 @@ function createBaseball() {
         // Add home run class for special animation
         DOM.addClass(wrapper, 'home-run');
         
-        // Create explosion effect
+        // Create explosion effect - ENSURE THIS IS CALLED
         createExplosion(centerX, centerY, isGolden);
         
         // Create new star at the peak of the animation
@@ -135,11 +146,8 @@ function createBaseball() {
     setTimeout(() => {
         if (wrapper.parentNode && !isClicked) {
             DOM.remove(wrapper);
-            // Reset streak if missed
-            if (streak > 0) {
-                console.log(`Streak ended at ${streak}`);
-                streak = 0;
-            }
+            // Reset streak if missed (ball went off screen)
+            resetStreak();
         }
     }, window.gameSettings.slowMotion ? 12000 : 4000);
 }
@@ -209,12 +217,43 @@ function showClickLocation(x, y, hit) {
     setTimeout(() => DOM.remove(marker), 2000);
 }
 
+// Handle misclicks (clicking but missing the ball)
+function handleMissClick(e) {
+    // Check if click was on a baseball or interactive element
+    const clickedElement = e.target;
+    
+    // Don't count as miss if clicking on UI elements
+    if (clickedElement.closest('.baseball-wrapper') || 
+        clickedElement.tagName === 'IFRAME' ||
+        clickedElement.closest('.music-container') ||
+        clickedElement.closest('.video-overlay') ||
+        clickedElement.closest('button') ||
+        clickedElement.id === 'musicPrompt') {
+        return;
+    }
+    
+    // This was a swing and a miss!
+    if (streak > 0) {
+        console.log('Swing and a miss! Streak broken.');
+        resetStreak();
+    }
+    
+    // Show miss location in debug mode
+    if (window.gameSettings.showClickLocations) {
+        showClickLocation(e.clientX, e.clientY, false);
+    }
+}
+
 // Initialize game
 function initializeGame() {
     // Load saved values
     totalHomeRuns = Storage.getNumber('totalHomeRuns', 0);
     bestStreak = Storage.getNumber('bestStreak', 0);
     updateScoreDisplay();
+    
+    // Add global click handler for miss detection
+    document.addEventListener('click', handleMissClick);
+    document.addEventListener('touchstart', handleMissClick);
     
     // Start baseball game with staggered timing
     let baseballInterval;

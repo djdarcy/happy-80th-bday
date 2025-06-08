@@ -40,14 +40,15 @@ function createConfetti() {
     }
 }
 
-// Create explosion effect when ball is hit
+// Create explosion effect when ball is hit - ENHANCED VERSION
 function createExplosion(x, y, isGolden = false) {
     const sparkCount = isGolden ? 20 : 12;
     const sparkColor = isGolden ? '#ffdd44' : '#ffff00';
     
+    // Create sparks in a circle pattern
     for (let i = 0; i < sparkCount; i++) {
         const angle = (i / sparkCount) * 2 * Math.PI;
-        const distance = Random.between(50, 80);
+        const distance = Random.between(50, 100); // Increased distance for more dramatic effect
         const endX = Math.cos(angle) * distance;
         const endY = Math.sin(angle) * distance;
         
@@ -56,21 +57,40 @@ function createExplosion(x, y, isGolden = false) {
                 position: 'fixed',
                 left: x + 'px',
                 top: y + 'px',
-                width: isGolden ? '6px' : '4px',
-                height: isGolden ? '6px' : '4px',
+                width: isGolden ? '8px' : '6px', // Bigger sparks
+                height: isGolden ? '8px' : '6px',
                 background: sparkColor,
                 borderRadius: '50%',
                 pointerEvents: 'none',
                 zIndex: '10000',
-                boxShadow: `0 0 ${isGolden ? '10px' : '5px'} ${sparkColor}`,
+                boxShadow: `0 0 ${isGolden ? '15px' : '10px'} ${sparkColor}`, // More glow
                 '--endX': endX + 'px',
                 '--endY': endY + 'px',
-                animation: 'sparkFly 0.6s ease-out forwards'
+                animation: 'sparkFly 0.8s ease-out forwards' // Slightly longer animation
             }
         });
         
         document.body.appendChild(spark);
     }
+    
+    // Also create a central flash effect
+    const flash = DOM.create('div', {
+        style: {
+            position: 'fixed',
+            left: (x - 30) + 'px',
+            top: (y - 30) + 'px',
+            width: '60px',
+            height: '60px',
+            background: `radial-gradient(circle, ${sparkColor} 0%, transparent 70%)`,
+            borderRadius: '50%',
+            pointerEvents: 'none',
+            zIndex: '9999',
+            opacity: '0.8',
+            animation: 'flashExpand 0.4s ease-out forwards'
+        }
+    });
+    
+    document.body.appendChild(flash);
     
     // Clean up after animation
     setTimeout(() => {
@@ -79,8 +99,25 @@ function createExplosion(x, y, isGolden = false) {
                 DOM.remove(spark);
             }
         });
-    }, 600);
+        DOM.remove(flash);
+    }, 800);
 }
+
+// Add the flash expansion animation to the CSS
+const flashStyle = document.createElement('style');
+flashStyle.textContent = `
+    @keyframes flashExpand {
+        0% {
+            transform: scale(0.5);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(flashStyle);
 
 // Create a new star where the home run was hit
 function createNewStar(x, y) {
