@@ -3,7 +3,7 @@
 // Debug settings
 window.gameSettings = {
     debugMode: false,
-    clickTargetSize: 110,
+    clickTargetSize: 50,  // Changed from 110 to 50 (3 sizes smaller)
     showClickLocations: false,
     pauseBaseballs: false,
     slowMotion: false
