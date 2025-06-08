@@ -26,57 +26,146 @@
         
         .baseball {
             position: absolute;
-            font-size: 20px;
-            cursor: pointer;
+            width: 30px;
+            height: 30px;
             pointer-events: auto;
             z-index: 15;
             animation: baseballThrow 4s linear forwards;
-            transition: transform 0.1s ease;
             user-select: none;
         }
         
-        .baseball:hover {
-            transform: scale(1.1);
+        /* Larger invisible click target */
+        .click-target {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            top: -25px;
+            left: -25px;
+            cursor: pointer;
+            z-index: 25;
+            /* Uncomment to debug click area */
+            /* background: rgba(255, 0, 0, 0.2); */
+            /* border: 1px solid red; */
+        }
+        
+        .baseball-visual {
+            font-size: 20px;
+            pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: baseballThrowVisual 4s linear forwards;
+        }
+        
+        /* CSS Baseball alternative (commented out, using emoji for now) */
+        .baseball-css {
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                inset -2px -2px 4px rgba(0,0,0,0.3),
+                1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .baseball-css::before,
+        .baseball-css::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1.5px solid #cc0000;
+        }
+        
+        .baseball-css::before {
+            clip-path: polygon(48% 0, 52% 0, 52% 100%, 48% 100%);
+        }
+        
+        .baseball-css::after {
+            clip-path: polygon(0 48%, 100% 48%, 100% 52%, 0 52%);
+            transform: rotate(60deg);
         }
         
         @keyframes baseballThrow {
             0% {
-                transform: translateX(-50px) translateY(0vh);
-                font-size: 15px;
+                transform: translateX(-50px) translateY(10vh);
                 opacity: 1;
             }
             25% {
-                transform: translateX(25vw) translateY(-15vh);
+                transform: translateX(25vw) translateY(-10vh);
+            }
+            50% {
+                transform: translateX(50vw) translateY(-15vh);
+            }
+            75% {
+                transform: translateX(75vw) translateY(-10vh);
+            }
+            100% {
+                transform: translateX(calc(100vw + 50px)) translateY(10vh);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes baseballThrowVisual {
+            0% {
+                font-size: 15px;
+            }
+            25% {
                 font-size: 25px;
             }
             50% {
-                transform: translateX(50vw) translateY(-20vh);
                 font-size: 30px;
             }
             75% {
-                transform: translateX(75vw) translateY(-15vh);
                 font-size: 25px;
             }
             100% {
-                transform: translateX(calc(100vw + 50px)) translateY(0vh);
                 font-size: 15px;
-                opacity: 0;
             }
         }
         
-        @keyframes homerunBall {
+        /* Improved home run animation */
+        @keyframes homerunToStar {
             0% {
-                font-size: 30px;
-                transform: rotate(0deg);
+                transform: scale(1) translateY(0) rotate(0deg);
                 opacity: 1;
+                filter: brightness(1);
+            }
+            30% {
+                transform: scale(0.8) translateY(-20vh) rotate(180deg);
+                filter: brightness(1.5);
+            }
+            60% {
+                transform: scale(0.4) translateY(-40vh) rotate(360deg);
+                filter: brightness(2) blur(1px);
+            }
+            80% {
+                transform: scale(0.2) translateY(-55vh) rotate(540deg);
+                opacity: 0.8;
+                filter: brightness(3) blur(2px);
             }
             100% {
-                font-size: 8px;
-                transform: translateY(-50vh) rotate(720deg);
+                transform: scale(0.05) translateY(-65vh) rotate(720deg);
                 opacity: 0;
+                filter: brightness(4) blur(3px);
             }
         }
         
+        .baseball.home-run {
+            animation: none !important;
+        }
+        
+        .baseball.home-run .baseball-visual {
+            animation: homerunToStar 2s ease-out forwards !important;
+        }
+        
+        /* Star creation animation */
         .new-star {
             position: absolute;
             background: #ffff88;
@@ -103,6 +192,18 @@
                 transform: scale(1);
                 opacity: 0.8;
                 box-shadow: 0 0 6px #ffff88;
+            }
+        }
+        
+        /* Explosion spark animation */
+        @keyframes sparkFly {
+            0% {
+                transform: translate(0, 0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--endX), var(--endY)) scale(0);
+                opacity: 0;
             }
         }
         
@@ -176,26 +277,6 @@
             justify-content: center;
         }
         
-        .game-zone {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            background: rgba(0, 102, 204, 0.05);
-            border: 2px dashed rgba(0, 102, 204, 0.3);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .game-zone-text {
-            color: rgba(0, 102, 204, 0.4);
-            font-size: 1.5rem;
-            text-align: center;
-            pointer-events: none;
-            text-shadow: 0 0 10px rgba(0, 102, 204, 0.3);
-        }
-        
         /* Animated background stars */
         .stars {
             position: absolute;
@@ -218,8 +299,10 @@
             100% { opacity: 1; transform: scale(1.2); }
         }
         
-        /* Main container */
         .birthday-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
             text-align: center;
             z-index: 10;
             position: relative;
@@ -390,6 +473,12 @@
             .mets-info {
                 font-size: 1.2rem;
             }
+            .click-target {
+                width: 100px;
+                height: 100px;
+                top: -35px;
+                left: -35px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -412,29 +501,36 @@
     <!-- Baseball mini-game -->
     <div class="game-container" id="gameContainer"></div>
     <div class="score-display" id="scoreDisplay">Home Runs: 0</div>
-    <div class="game-instructions">⚾ Click the baseballs to hit home runs! ⚾</div>
     
     <!-- Floating confetti -->
     <div class="confetti-container" id="confetti"></div>
     
     <div class="birthday-container">
-        <div class="neon-text happy">Happy</div>
-        <div class="neon-text number">80th</div>
-        <div class="neon-text birthday">Birthday</div>
-        <div class="neon-text steve">Steve!</div>
-        
-        <div class="mets-info">
-            🧡💙 Let's Go Mets! Currently 41-24! 💙🧡
-        </div>
-        
-        <div class="music-container">
-            <div class="music-title">🎵 Birthday Blues for the Mets 🎵</div>
-            <div class="soundcloud">
-                <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-                    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&inverse=false&auto_play=false&show_user=true"></iframe>
+        <div class="top-section">
+            <div class="neon-text happy">Happy</div>
+            <div class="neon-text number">80th</div>
+            <div class="neon-text birthday">Birthday</div>
+            <div class="neon-text steve">Steve!</div>
+            
+            <div class="mets-info" id="metsInfo">
+                🧡💙 Let's Go Mets! Currently 41-24! 💙🧡
             </div>
         </div>
-    </div>
+
+        <div class="game-area">
+            <!-- Game area serves as spacer between top and bottom -->
+        </div>
+        
+        <div class="bottom-section">
+            <div class="music-container">
+                <div class="music-title">🎵 Birthday Blues for the Mets 🎵</div>
+                <div class="soundcloud">
+                    <iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+                        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&inverse=false&auto_play=false&show_user=true"></iframe>
+                </div>
+            </div>
+            <div class="game-instructions">⚾ Click the baseballs to hit home runs! ⚾</div>
+        </div>
     </div>
 
     <script>
@@ -471,44 +567,65 @@
             }
         }
         
-        // Baseball mini-game
+        // Baseball mini-game with improved click detection
         function createBaseball() {
             const gameContainer = document.getElementById('gameContainer');
             const baseball = document.createElement('div');
             baseball.className = 'baseball';
-            baseball.textContent = '⚾';
             
-            // Position in the game area (middle section)
-            baseball.style.top = (30 + Math.random() * 40) + '%'; // 30-70% range for middle area
+            // Create larger invisible click target
+            const clickTarget = document.createElement('div');
+            clickTarget.className = 'click-target';
+            
+            // Create the visual emoji
+            const baseballVisual = document.createElement('div');
+            baseballVisual.className = 'baseball-visual';
+            baseballVisual.textContent = '⚾';
+            
+            // Alternative CSS baseball (uncomment to use instead of emoji)
+            /*
+            const baseballVisual = document.createElement('div');
+            baseballVisual.className = 'baseball-css';
+            */
+            
+            baseball.appendChild(clickTarget);
+            baseball.appendChild(baseballVisual);
+            
+            // Position in the game area (50-80% height range)
+            baseball.style.top = (50 + Math.random() * 30) + '%';
             baseball.style.left = '-50px';
             
             let isClicked = false;
             
-            // Add click event for home run
-            baseball.addEventListener('click', function(e) {
-                if (isClicked) return; // Prevent double clicks
+            // Handle both click and touch events
+            const handleHit = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (isClicked) return;
                 isClicked = true;
                 
-                e.stopPropagation();
                 score++;
                 document.getElementById('scoreDisplay').textContent = `Home Runs: ${score}`;
                 
-                // Get current position for star creation
+                // Get current position for effects
                 const rect = baseball.getBoundingClientRect();
-                const currentX = rect.left + rect.width / 2;
-                const currentY = rect.top + rect.height / 2;
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
                 
-                // Stop the throwing animation and start home run
-                baseball.style.animationPlayState = 'paused';
-                baseball.style.animation = 'homerunBall 2s ease-out forwards';
+                // Add home run class for special animation
+                baseball.classList.add('home-run');
                 
                 // Create explosion effect
-                createExplosion(currentX, currentY);
+                createExplosion(centerX, centerY);
                 
-                // Create new star where ball was hit
+                // Create new star at the peak of the animation
                 setTimeout(() => {
-                    createNewStar(currentX, currentY);
-                }, 1800); // Just before ball disappears
+                    const newRect = baseball.getBoundingClientRect();
+                    const starX = newRect.left + newRect.width / 2;
+                    const starY = newRect.top + newRect.height / 2;
+                    createNewStar(starX, starY);
+                }, 800);
                 
                 // Remove after animation
                 setTimeout(() => {
@@ -516,11 +633,15 @@
                         baseball.remove();
                     }
                 }, 2000);
-            });
+            };
+            
+            // Add event listeners for both click and touch
+            clickTarget.addEventListener('click', handleHit);
+            clickTarget.addEventListener('touchstart', handleHit);
             
             gameContainer.appendChild(baseball);
             
-            // Remove baseball after it crosses screen (only if not clicked)
+            // Remove baseball after it crosses screen (if not clicked)
             setTimeout(() => {
                 if (baseball.parentNode && !isClicked) {
                     baseball.remove();
@@ -528,48 +649,9 @@
             }, 4000);
         }
         
-        // Try to fetch live Mets stats
-        async function updateMetsStats() {
-            try {
-                // Using a free sports API - ESPN's public API
-                const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21');
-                const data = await response.json();
-                
-                if (data && data.team && data.team.record && data.team.record.items) {
-                    const overallRecord = data.team.record.items.find(item => item.type === 'total');
-                    if (overallRecord) {
-                        const wins = overallRecord.stats.find(stat => stat.name === 'wins')?.value || '41';
-                        const losses = overallRecord.stats.find(stat => stat.name === 'losses')?.value || '24';
-                        document.getElementById('metsInfo').innerHTML = 
-                            `🧡💙 Let's Go Mets! Currently ${wins}-${losses}! 💙🧡`;
-                    }
-                }
-            } catch (error) {
-                console.log('Using static stats as fallback');
-                // Keep the static 41-24 if API fails
-            }
-        }
-        
-        // Create a new star where the home run was hit
-        function createNewStar(x, y) {
-            const star = document.createElement('div');
-            star.className = 'new-star';
-            star.style.left = x + 'px';
-            star.style.top = y + 'px';
-            
-            // Add to stars container so it persists
-            document.getElementById('stars').appendChild(star);
-            
-            // After birth animation, make it twinkle like other stars
-            setTimeout(() => {
-                star.style.animation = 'twinkle 2s infinite alternate';
-                star.style.animationDelay = Math.random() * 2 + 's';
-            }, 2000);
-        }
-        
         // Create explosion effect when ball is hit
         function createExplosion(x, y) {
-            for (let i = 0; i < 8; i++) {
+            for (let i = 0; i < 12; i++) {
                 const spark = document.createElement('div');
                 spark.style.position = 'absolute';
                 spark.style.left = x + 'px';
@@ -581,38 +663,113 @@
                 spark.style.pointerEvents = 'none';
                 spark.style.zIndex = '1000';
                 
-                const angle = (i / 8) * 2 * Math.PI;
-                const distance = 50;
-                const endX = x + Math.cos(angle) * distance;
-                const endY = y + Math.sin(angle) * distance;
+                const angle = (i / 12) * 2 * Math.PI;
+                const distance = 50 + Math.random() * 30;
+                const endX = Math.cos(angle) * distance;
+                const endY = Math.sin(angle) * distance;
                 
-                spark.style.animation = `sparkFly 0.5s ease-out forwards`;
                 spark.style.setProperty('--endX', endX + 'px');
                 spark.style.setProperty('--endY', endY + 'px');
+                spark.style.animation = 'sparkFly 0.6s ease-out forwards';
                 
                 document.body.appendChild(spark);
                 
                 setTimeout(() => {
                     spark.remove();
-                }, 500);
+                }, 600);
             }
         }
         
-        // Add spark animation CSS
-        const sparkStyle = document.createElement('style');
-        sparkStyle.textContent = `
-            @keyframes sparkFly {
-                0% {
-                    transform: scale(1);
-                    opacity: 1;
+        // Create a new star where the home run was hit
+        function createNewStar(x, y) {
+            const star = document.createElement('div');
+            star.className = 'new-star';
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
+            
+            // Add to stars container
+            document.getElementById('stars').appendChild(star);
+            
+            // After birth animation, make it twinkle
+            setTimeout(() => {
+                star.style.animation = 'twinkle 2s infinite alternate';
+                star.style.animationDelay = Math.random() * 2 + 's';
+            }, 2000);
+        }
+        
+        // Try to fetch live Mets stats with multiple approaches
+        async function updateMetsStats() {
+            const metsInfo = document.getElementById('metsInfo');
+            
+            try {
+                // Try multiple endpoints
+                const endpoints = [
+                    'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21',
+                    'https://site.web.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21/schedule',
+                    'https://statsapi.mlb.com/api/v1/teams/121' // MLB's official API (Mets team ID is 121)
+                ];
+                
+                // Try ESPN endpoint first
+                try {
+                    const response = await fetch(endpoints[0], {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data && data.team && data.team.record && data.team.record.items) {
+                            const overallRecord = data.team.record.items.find(item => item.type === 'total' || item.type === 'overall');
+                            if (overallRecord && overallRecord.summary) {
+                                // Extract wins-losses from summary (format: "41-24")
+                                metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${overallRecord.summary}! 💙🧡`;
+                                console.log('Successfully fetched Mets stats from ESPN');
+                                return;
+                            }
+                        }
+                    }
+                } catch (espnError) {
+                    console.log('ESPN API failed, trying MLB API...');
                 }
-                100% {
-                    transform: translate(var(--endX, 0), var(--endY, 0)) scale(0);
-                    opacity: 0;
+                
+                // Try MLB Stats API as fallback
+                try {
+                    const mlbResponse = await fetch(endpoints[2]);
+                    if (mlbResponse.ok) {
+                        const mlbData = await mlbResponse.json();
+                        // Note: This endpoint doesn't provide current season record directly
+                        // You'd need to make additional calls to get the current standings
+                        console.log('MLB API response received but needs additional processing');
+                    }
+                } catch (mlbError) {
+                    console.log('MLB API also failed');
                 }
+                
+                // If all APIs fail, try a JSONP approach (last resort)
+                // This creates a script tag to bypass CORS
+                const script = document.createElement('script');
+                script.src = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21?callback=handleMetsData';
+                window.handleMetsData = function(data) {
+                    if (data && data.team && data.team.displayName) {
+                        console.log('JSONP approach worked for basic data');
+                    }
+                    document.body.removeChild(script);
+                    delete window.handleMetsData;
+                };
+                script.onerror = function() {
+                    console.log('JSONP approach also failed');
+                    document.body.removeChild(script);
+                };
+                document.body.appendChild(script);
+                
+            } catch (error) {
+                console.log('All API attempts failed, using static fallback');
+                // Static fallback is already displayed
             }
-        `;
-        document.head.appendChild(sparkStyle);
+        }
         
         // Initialize animations when page loads
         window.addEventListener('load', function() {
@@ -622,32 +779,48 @@
             // Try to get live Mets stats
             updateMetsStats();
             
-            // Start baseball game
-            setInterval(createBaseball, 3000);
+            // Start baseball game with staggered timing
+            setTimeout(() => {
+                createBaseball();
+                setInterval(createBaseball, 2500 + Math.random() * 1000);
+            }, 1000);
             
-            // Add extra sparkle effect on click (but not on baseballs)
+            // Add sparkle effect on background clicks
             document.addEventListener('click', function(e) {
-                if (!e.target.classList.contains('baseball')) {
-                    const sparkle = document.createElement('div');
-                    sparkle.style.position = 'absolute';
-                    sparkle.style.left = e.clientX + 'px';
-                    sparkle.style.top = e.clientY + 'px';
-                    sparkle.style.width = '20px';
-                    sparkle.style.height = '20px';
-                    sparkle.style.background = '#ffffff';
-                    sparkle.style.borderRadius = '50%';
-                    sparkle.style.pointerEvents = 'none';
-                    sparkle.style.zIndex = '1000';
-                    sparkle.style.animation = 'pulse 0.5s ease-out forwards';
-                    document.body.appendChild(sparkle);
-                    
-                    setTimeout(() => {
-                        sparkle.remove();
-                    }, 500);
+                // Don't create sparkles on interactive elements
+                if (e.target.classList.contains('click-target') || 
+                    e.target.tagName === 'IFRAME' ||
+                    e.target.closest('.music-container')) {
+                    return;
                 }
+                
+                const sparkle = document.createElement('div');
+                sparkle.style.position = 'absolute';
+                sparkle.style.left = e.clientX + 'px';
+                sparkle.style.top = e.clientY + 'px';
+                sparkle.style.width = '20px';
+                sparkle.style.height = '20px';
+                sparkle.style.background = 'radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%)';
+                sparkle.style.borderRadius = '50%';
+                sparkle.style.pointerEvents = 'none';
+                sparkle.style.zIndex = '1000';
+                sparkle.style.animation = 'pulse 0.5s ease-out forwards';
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 500);
             });
         });
+        
+        // Add visibility API to pause/resume when tab is not visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Could pause baseball generation here if needed
+            } else {
+                // Resume when visible
+            }
+        });
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 </body>
 </html>
