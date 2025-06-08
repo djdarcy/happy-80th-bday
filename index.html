@@ -15,60 +15,51 @@
         
         /* Baseball mini-game styles */
         .game-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 5;
+            z-index: 50;
+        }
+        
+        .baseball-wrapper {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            pointer-events: auto !important;
+            z-index: 1000;
+            cursor: pointer;
+            /* Uncomment to see the actual click area */
+            /* background: rgba(0, 255, 0, 0.1); */
+            /* border: 1px solid lime; */
         }
         
         .baseball {
             position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 30px;
             height: 30px;
-            pointer-events: auto;
-            z-index: 15;
-            animation: baseballThrow 4s linear forwards;
+            pointer-events: none;
             user-select: none;
         }
         
-        /* Larger invisible click target */
-        .click-target {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            top: -25px;
-            left: -25px;
-            cursor: pointer;
-            z-index: 100;  /* Increased from 25 to ensure it's on top */
-            pointer-events: auto !important;  /* Force pointer events */
-            /* Uncomment to debug click area */
-            /* background: rgba(255, 0, 0, 0.2); */
-            /* border: 1px solid red; */
-        }
-        
         .baseball-visual {
-            font-size: 20px;
-            pointer-events: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            font-size: 30px;
+            line-height: 1;
             animation: baseballThrowVisual 4s linear forwards;
         }
         
-        /* CSS Baseball alternative (commented out, using emoji for now) */
+        /* CSS Baseball alternative */
         .baseball-css {
-            width: 25px;
-            height: 25px;
+            width: 30px;
+            height: 30px;
             background: white;
             border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: relative;
             box-shadow: 
                 inset -2px -2px 4px rgba(0,0,0,0.3),
                 1px 1px 2px rgba(0,0,0,0.2);
@@ -115,54 +106,48 @@
         
         @keyframes baseballThrowVisual {
             0% {
-                font-size: 15px;
-            }
-            25% {
-                font-size: 25px;
+                font-size: 20px;
             }
             50% {
-                font-size: 30px;
-            }
-            75% {
-                font-size: 25px;
+                font-size: 35px;
             }
             100% {
-                font-size: 15px;
+                font-size: 20px;
             }
         }
         
         /* Improved home run animation */
         @keyframes homerunToStar {
             0% {
-                transform: scale(1) translateY(0) rotate(0deg);
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
                 opacity: 1;
                 filter: brightness(1);
             }
             30% {
-                transform: scale(0.8) translateY(-20vh) rotate(180deg);
+                transform: translate(-50%, -50%) scale(0.8) translateY(-20vh) rotate(180deg);
                 filter: brightness(1.5);
             }
             60% {
-                transform: scale(0.4) translateY(-40vh) rotate(360deg);
+                transform: translate(-50%, -50%) scale(0.4) translateY(-40vh) rotate(360deg);
                 filter: brightness(2) blur(1px);
             }
             80% {
-                transform: scale(0.2) translateY(-55vh) rotate(540deg);
+                transform: translate(-50%, -50%) scale(0.2) translateY(-55vh) rotate(540deg);
                 opacity: 0.8;
                 filter: brightness(3) blur(2px);
             }
             100% {
-                transform: scale(0.05) translateY(-65vh) rotate(720deg);
+                transform: translate(-50%, -50%) scale(0.05) translateY(-65vh) rotate(720deg);
                 opacity: 0;
                 filter: brightness(4) blur(3px);
             }
         }
         
-        .baseball.home-run {
-            animation: none !important;
+        .baseball-wrapper.home-run {
+            animation-play-state: paused !important;
         }
         
-        .baseball.home-run .baseball-visual {
+        .baseball-wrapper.home-run .baseball-visual {
             animation: homerunToStar 2s ease-out forwards !important;
         }
         
@@ -209,7 +194,7 @@
         }
         
         .score-display {
-            position: absolute;
+            position: fixed;
             top: 20px;
             right: 20px;
             color: #ff6600;
@@ -218,7 +203,7 @@
             text-shadow: 
                 0 0 5px #ff6600,
                 0 0 10px #ff6600;
-            z-index: 20;
+            z-index: 100;
         }
         
         .game-instructions {
@@ -463,6 +448,32 @@
             }
         }
         
+        /* Debug styles */
+        .debug-mode .baseball-wrapper {
+            background: rgba(255, 0, 0, 0.3) !important;
+            border: 2px solid red !important;
+        }
+        
+        .click-marker {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            border: 2px solid;
+        }
+        
+        .click-marker.hit {
+            background: lime;
+            border-color: green;
+        }
+        
+        .click-marker.miss {
+            background: red;
+            border-color: darkred;
+        }
+        
         /* Responsive design */
         @media (max-width: 768px) {
             .neon-text {
@@ -473,12 +484,6 @@
             }
             .mets-info {
                 font-size: 1.2rem;
-            }
-            .click-target {
-                width: 100px;
-                height: 100px;
-                top: -35px;
-                left: -35px;
             }
         }
         
@@ -535,7 +540,13 @@
     </div>
 
     <script>
+        // Global variables
         let score = 0;
+        let debugMode = false;
+        let clickTargetSize = 150;
+        let showClickLocations = false;
+        let pauseBaseballs = false;
+        let slowMotion = false;
         
         // Create animated stars
         function createStars() {
@@ -571,55 +582,37 @@
         // Baseball mini-game with improved click detection
         function createBaseball() {
             const gameContainer = document.getElementById('gameContainer');
+            
+            // Create wrapper div that will handle clicks
+            const wrapper = document.createElement('div');
+            wrapper.className = 'baseball-wrapper';
+            wrapper.style.width = clickTargetSize + 'px';
+            wrapper.style.height = clickTargetSize + 'px';
+            
+            // Create the baseball container
             const baseball = document.createElement('div');
             baseball.className = 'baseball';
-            
-            // Create larger invisible click target
-            const clickTarget = document.createElement('div');
-            clickTarget.className = 'click-target';
-            clickTarget.style.width = clickTargetSize + 'px';
-            clickTarget.style.height = clickTargetSize + 'px';
-            clickTarget.style.top = -(clickTargetSize - 30) / 2 + 'px';
-            clickTarget.style.left = -(clickTargetSize - 30) / 2 + 'px';
-            clickTarget.style.position = 'absolute';
-            clickTarget.style.cursor = 'pointer';
-            clickTarget.style.zIndex = '100';
-            clickTarget.style.pointerEvents = 'auto';
-            
-            // Apply debug styles if debug mode is on
-            if (debugMode) {
-                clickTarget.style.background = 'rgba(255, 0, 0, 0.3)';
-                clickTarget.style.border = '2px solid red';
-            }
             
             // Create the visual emoji
             const baseballVisual = document.createElement('div');
             baseballVisual.className = 'baseball-visual';
             baseballVisual.textContent = '⚾';
-            baseballVisual.style.pointerEvents = 'none'; // Ensure visual doesn't block clicks
             
-            // Alternative CSS baseball (uncomment to use instead of emoji)
-            /*
-            const baseballVisual = document.createElement('div');
-            baseballVisual.className = 'baseball-css';
-            baseballVisual.style.pointerEvents = 'none';
-            */
-            
-            baseball.appendChild(clickTarget);
+            // Assemble the structure
             baseball.appendChild(baseballVisual);
+            wrapper.appendChild(baseball);
             
-            // Position in the game area (50-80% height range)
-            baseball.style.top = (50 + Math.random() * 30) + '%';
-            baseball.style.left = '-50px';
+            // Position in the game area (40-70% height range)
+            const startY = 40 + Math.random() * 30;
+            wrapper.style.top = startY + '%';
+            wrapper.style.left = '-150px';
             
-            // Apply slow motion if enabled
-            if (slowMotion) {
-                baseball.style.animationDuration = '12s';
-            }
+            // Apply animation to wrapper
+            wrapper.style.animation = `baseballThrow ${slowMotion ? '12s' : '4s'} linear forwards`;
             
             let isClicked = false;
             
-            // Handle both click and touch events
+            // Handle click/touch events
             const handleHit = function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -632,30 +625,25 @@
                     showClickLocation(e.clientX, e.clientY, true);
                 }
                 
-                console.log('Home run! Baseball clicked at:', {
-                    clientX: e.clientX,
-                    clientY: e.clientY,
-                    targetClass: e.target.className,
-                    currentTarget: e.currentTarget.className
-                });
+                console.log('Home run! Baseball clicked');
                 
                 score++;
                 document.getElementById('scoreDisplay').textContent = `Home Runs: ${score}`;
                 
                 // Get current position for effects
-                const rect = baseball.getBoundingClientRect();
+                const rect = wrapper.getBoundingClientRect();
                 const centerX = rect.left + rect.width / 2;
                 const centerY = rect.top + rect.height / 2;
                 
                 // Add home run class for special animation
-                baseball.classList.add('home-run');
+                wrapper.classList.add('home-run');
                 
                 // Create explosion effect
                 createExplosion(centerX, centerY);
                 
                 // Create new star at the peak of the animation
                 setTimeout(() => {
-                    const newRect = baseball.getBoundingClientRect();
+                    const newRect = wrapper.getBoundingClientRect();
                     const starX = newRect.left + newRect.width / 2;
                     const starY = newRect.top + newRect.height / 2;
                     createNewStar(starX, starY);
@@ -663,37 +651,37 @@
                 
                 // Remove after animation
                 setTimeout(() => {
-                    if (baseball.parentNode) {
-                        baseball.remove();
+                    if (wrapper.parentNode) {
+                        wrapper.remove();
                     }
                 }, 2000);
             };
             
-            // Add event listeners for both click and touch
-            clickTarget.addEventListener('click', handleHit, true); // Use capture phase
-            clickTarget.addEventListener('touchstart', handleHit, true);
+            // Add event listeners
+            wrapper.addEventListener('click', handleHit);
+            wrapper.addEventListener('touchstart', handleHit);
+            wrapper.addEventListener('pointerdown', handleHit);
             
-            // Additional pointer events for better compatibility
-            clickTarget.addEventListener('pointerdown', handleHit, true);
+            // Debug logging
+            if (debugMode) {
+                console.log('Baseball created');
+            }
             
-            // Debug: Log when baseball is created
-            console.log('Baseball created with click target size:', clickTargetSize, 'z-index:', clickTarget.style.zIndex);
-            
-            gameContainer.appendChild(baseball);
+            gameContainer.appendChild(wrapper);
             
             // Remove baseball after it crosses screen (if not clicked)
             setTimeout(() => {
-                if (baseball.parentNode && !isClicked) {
-                    baseball.remove();
+                if (wrapper.parentNode && !isClicked) {
+                    wrapper.remove();
                 }
-            }, 4000);
+            }, slowMotion ? 12000 : 4000);
         }
         
         // Create explosion effect when ball is hit
         function createExplosion(x, y) {
             for (let i = 0; i < 12; i++) {
                 const spark = document.createElement('div');
-                spark.style.position = 'absolute';
+                spark.style.position = 'fixed';
                 spark.style.left = x + 'px';
                 spark.style.top = y + 'px';
                 spark.style.width = '4px';
@@ -701,7 +689,7 @@
                 spark.style.background = '#ffff00';
                 spark.style.borderRadius = '50%';
                 spark.style.pointerEvents = 'none';
-                spark.style.zIndex = '1000';
+                spark.style.zIndex = '10000';
                 
                 const angle = (i / 12) * 2 * Math.PI;
                 const distance = 50 + Math.random() * 30;
@@ -737,110 +725,39 @@
             }, 2000);
         }
         
-        // Try to fetch live Mets stats with multiple approaches
+        // Try to fetch live Mets stats
         async function updateMetsStats() {
-            const metsInfo = document.getElementById('metsInfo');
-            
             try {
-                // Try multiple endpoints
-                const endpoints = [
-                    'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21',
-                    'https://site.web.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21/schedule',
-                    'https://statsapi.mlb.com/api/v1/teams/121' // MLB's official API (Mets team ID is 121)
-                ];
-                
-                // Try ESPN endpoint first
-                try {
-                    const response = await fetch(endpoints[0], {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        if (data && data.team && data.team.record && data.team.record.items) {
-                            const overallRecord = data.team.record.items.find(item => item.type === 'total' || item.type === 'overall');
-                            if (overallRecord && overallRecord.summary) {
-                                // Extract wins-losses from summary (format: "41-24")
-                                metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${overallRecord.summary}! 💙🧡`;
-                                console.log('Successfully fetched Mets stats from ESPN');
-                                return;
-                            }
+                const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.team && data.team.record && data.team.record.items) {
+                        const overallRecord = data.team.record.items.find(item => item.type === 'total' || item.type === 'overall');
+                        if (overallRecord && overallRecord.summary) {
+                            document.getElementById('metsInfo').innerHTML = 
+                                `🧡💙 Let's Go Mets! Currently ${overallRecord.summary}! 💙🧡`;
+                            console.log('Successfully fetched Mets stats from ESPN');
                         }
                     }
-                } catch (espnError) {
-                    console.log('ESPN API failed, trying MLB API...');
                 }
-                
-                // Try MLB Stats API as fallback
-                try {
-                    const mlbResponse = await fetch(endpoints[2]);
-                    if (mlbResponse.ok) {
-                        const mlbData = await mlbResponse.json();
-                        // Note: This endpoint doesn't provide current season record directly
-                        // You'd need to make additional calls to get the current standings
-                        console.log('MLB API response received but needs additional processing');
-                    }
-                } catch (mlbError) {
-                    console.log('MLB API also failed');
-                }
-                
-                // If all APIs fail, try a JSONP approach (last resort)
-                // This creates a script tag to bypass CORS
-                const script = document.createElement('script');
-                script.src = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/teams/21?callback=handleMetsData';
-                window.handleMetsData = function(data) {
-                    if (data && data.team && data.team.displayName) {
-                        console.log('JSONP approach worked for basic data');
-                    }
-                    document.body.removeChild(script);
-                    delete window.handleMetsData;
-                };
-                script.onerror = function() {
-                    console.log('JSONP approach also failed');
-                    document.body.removeChild(script);
-                };
-                document.body.appendChild(script);
-                
             } catch (error) {
-                console.log('All API attempts failed, using static fallback');
-                // Static fallback is already displayed
+                console.log('Using static stats as fallback');
             }
         }
-        
-        // Debug variables
-        let debugMode = false;
-        let clickTargetSize = 80;
-        let showClickLocations = false;
-        let pauseBaseballs = false;
-        let slowMotion = false;
         
         // Debug functions
         function toggleDebug() {
             debugMode = !debugMode;
-            document.querySelectorAll('.click-target').forEach(target => {
-                if (debugMode) {
-                    target.style.background = 'rgba(255, 0, 0, 0.3)';
-                    target.style.border = '2px solid red';
-                } else {
-                    target.style.background = '';
-                    target.style.border = '';
-                }
-            });
+            document.body.classList.toggle('debug-mode', debugMode);
             console.log('Debug mode:', debugMode ? 'ON' : 'OFF');
         }
         
         function adjustClickTargetSize(delta) {
             clickTargetSize += delta;
-            clickTargetSize = Math.max(30, Math.min(200, clickTargetSize));
-            document.querySelectorAll('.click-target').forEach(target => {
-                target.style.width = clickTargetSize + 'px';
-                target.style.height = clickTargetSize + 'px';
-                target.style.top = -(clickTargetSize - 30) / 2 + 'px';
-                target.style.left = -(clickTargetSize - 30) / 2 + 'px';
+            clickTargetSize = Math.max(50, Math.min(300, clickTargetSize));
+            document.querySelectorAll('.baseball-wrapper').forEach(wrapper => {
+                wrapper.style.width = clickTargetSize + 'px';
+                wrapper.style.height = clickTargetSize + 'px';
             });
             console.log('Click target size:', clickTargetSize);
         }
@@ -849,19 +766,54 @@
             if (!showClickLocations) return;
             
             const marker = document.createElement('div');
-            marker.style.position = 'absolute';
+            marker.className = 'click-marker ' + (hit ? 'hit' : 'miss');
             marker.style.left = x + 'px';
             marker.style.top = y + 'px';
-            marker.style.width = '10px';
-            marker.style.height = '10px';
-            marker.style.borderRadius = '50%';
-            marker.style.background = hit ? 'lime' : 'red';
-            marker.style.border = '2px solid ' + (hit ? 'green' : 'darkred');
-            marker.style.pointerEvents = 'none';
-            marker.style.zIndex = '9999';
             document.body.appendChild(marker);
             
             setTimeout(() => marker.remove(), 2000);
+        }
+        
+        // Test function to simulate a click on a baseball
+        function testClickBaseball() {
+            const baseballs = document.querySelectorAll('.baseball-wrapper');
+            if (baseballs.length === 0) {
+                console.log('No baseballs on screen to test!');
+                return;
+            }
+            
+            const baseball = baseballs[0];
+            const rect = baseball.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            console.log('Testing click on baseball at:', { x: centerX, y: centerY });
+            
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY
+            });
+            
+            baseball.dispatchEvent(clickEvent);
+        }
+        
+        // Function to check what element is at a specific point
+        function checkElementAtPoint(x, y) {
+            const element = document.elementFromPoint(x, y);
+            console.log('Element at point', {x, y}, ':', element);
+            if (element) {
+                console.log('Element details:', {
+                    tagName: element.tagName,
+                    className: element.className,
+                    id: element.id,
+                    zIndex: window.getComputedStyle(element).zIndex,
+                    pointerEvents: window.getComputedStyle(element).pointerEvents,
+                    parent: element.parentElement ? element.parentElement.className : 'none'
+                });
+            }
         }
         
         // Debug keyboard shortcuts
@@ -897,54 +849,35 @@
             else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'S') {
                 e.preventDefault();
                 slowMotion = !slowMotion;
-                document.querySelectorAll('.baseball').forEach(baseball => {
-                    baseball.style.animationDuration = slowMotion ? '12s' : '4s';
-                });
                 console.log('Slow motion:', slowMotion ? 'ON' : 'OFF');
             }
             // CTRL+ALT+SHIFT+L: Log all active baseballs
             else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'L') {
                 e.preventDefault();
-                const baseballs = document.querySelectorAll('.baseball');
+                const baseballs = document.querySelectorAll('.baseball-wrapper');
                 console.log('Active baseballs:', baseballs.length);
                 baseballs.forEach((b, i) => {
                     const rect = b.getBoundingClientRect();
-                    const clickTarget = b.querySelector('.click-target');
-                    const targetRect = clickTarget ? clickTarget.getBoundingClientRect() : null;
                     console.log(`Baseball ${i}:`, {
-                        baseball: {
-                            left: rect.left,
-                            top: rect.top,
-                            width: rect.width,
-                            height: rect.height,
-                            zIndex: window.getComputedStyle(b).zIndex
-                        },
-                        clickTarget: targetRect ? {
-                            left: targetRect.left,
-                            top: targetRect.top,
-                            width: targetRect.width,
-                            height: targetRect.height,
-                            zIndex: window.getComputedStyle(clickTarget).zIndex,
-                            pointerEvents: window.getComputedStyle(clickTarget).pointerEvents
-                        } : 'No click target found'
+                        left: rect.left,
+                        top: rect.top,
+                        width: rect.width,
+                        height: rect.height
                     });
                 });
             }
-            // CTRL+ALT+SHIFT+Z: Check z-index stacking
-            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'Z') {
+            // CTRL+ALT+SHIFT+T: Test click on first baseball
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'T') {
                 e.preventDefault();
-                console.log('Z-index analysis:');
-                const elements = document.querySelectorAll('*');
-                const zIndexed = Array.from(elements)
-                    .map(el => ({
-                        element: el,
-                        className: el.className,
-                        zIndex: window.getComputedStyle(el).zIndex
-                    }))
-                    .filter(item => item.zIndex !== 'auto' && item.zIndex !== '0')
-                    .sort((a, b) => parseInt(b.zIndex) - parseInt(a.zIndex));
-                
-                console.table(zIndexed.slice(0, 20)); // Show top 20 z-indexed elements
+                testClickBaseball();
+            }
+            // CTRL+ALT+SHIFT+W: Check element at mouse position
+            else if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'W') {
+                e.preventDefault();
+                document.addEventListener('click', function checkElement(e) {
+                    checkElementAtPoint(e.clientX, e.clientY);
+                }, { once: true });
+                console.log('Click anywhere to check what element is at that point...');
             }
         });
         
@@ -970,19 +903,28 @@
             // Add sparkle effect on background clicks
             document.addEventListener('click', function(e) {
                 // Show click location in debug mode
-                if (showClickLocations) {
+                if (showClickLocations && !e.target.closest('.baseball-wrapper')) {
                     showClickLocation(e.clientX, e.clientY, false);
                 }
                 
+                // Debug: Log what was clicked
+                if (debugMode) {
+                    console.log('Click detected on:', {
+                        target: e.target,
+                        className: e.target.className,
+                        tagName: e.target.tagName
+                    });
+                }
+                
                 // Don't create sparkles on interactive elements
-                if (e.target.classList.contains('click-target') || 
+                if (e.target.closest('.baseball-wrapper') || 
                     e.target.tagName === 'IFRAME' ||
                     e.target.closest('.music-container')) {
                     return;
                 }
                 
                 const sparkle = document.createElement('div');
-                sparkle.style.position = 'absolute';
+                sparkle.style.position = 'fixed';
                 sparkle.style.left = e.clientX + 'px';
                 sparkle.style.top = e.clientY + 'px';
                 sparkle.style.width = '20px';
@@ -1008,16 +950,8 @@
             console.log('CTRL+ALT+SHIFT+P - Pause baseball generation');
             console.log('CTRL+ALT+SHIFT+S - Slow motion mode');
             console.log('CTRL+ALT+SHIFT+L - Log all active baseballs');
-            console.log('CTRL+ALT+SHIFT+Z - Analyze z-index stacking');
-        });
-        
-        // Add visibility API to pause/resume when tab is not visible
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                // Could pause baseball generation here if needed
-            } else {
-                // Resume when visible
-            }
+            console.log('CTRL+ALT+SHIFT+T - Test click on first baseball');
+            console.log('CTRL+ALT+SHIFT+W - Check element at click point');
         });
     </script>
 </body>
