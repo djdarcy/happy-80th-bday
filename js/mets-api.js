@@ -2,6 +2,12 @@
 
 let lastMetsRecord = '';
 
+// Initialize with loading state
+function initializeMetsDisplay() {
+    const metsInfo = document.getElementById('metsInfo');
+    metsInfo.innerHTML = '🧡💙 Let\'s Go Mets! Loading stats... 💙🧡';
+}
+
 // Try to fetch live Mets stats with multiple approaches
 async function updateMetsStats() {
     const metsInfo = document.getElementById('metsInfo');
@@ -46,13 +52,13 @@ async function updateMetsStats() {
                         
                         metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${formattedRecord}! 💙🧡`;
                         
-                        console.log('Successfully fetched Mets stats from ESPN');
+                        console.log('Successfully fetched Mets stats from ESPN:', currentRecord);
                         return;
                     }
                 }
             }
         } catch (espnError) {
-            console.log('ESPN API failed, trying MLB API...');
+            console.log('ESPN API failed:', espnError);
         }
         
         // Try MLB Stats API as fallback
@@ -64,7 +70,7 @@ async function updateMetsStats() {
                 // TODO: Parse MLB API data format when CORS is resolved
             }
         } catch (mlbError) {
-            console.log('MLB API also failed');
+            console.log('MLB API also failed:', mlbError);
         }
         
         // If all APIs fail, try a JSONP approach (last resort)
@@ -80,16 +86,38 @@ async function updateMetsStats() {
         script.onerror = function() {
             console.log('JSONP approach also failed');
             document.body.removeChild(script);
+            // Use fallback after all attempts fail
+            useFallbackRecord();
         };
         document.body.appendChild(script);
         
     } catch (error) {
-        console.log('All API attempts failed, using static fallback');
+        console.log('All API attempts failed:', error);
+        useFallbackRecord();
     }
+}
+
+// Use fallback record when API fails
+function useFallbackRecord() {
+    const metsInfo = document.getElementById('metsInfo');
+    const fallbackRecord = lastMetsRecord || '41-24';
+    
+    console.log('Using fallback Mets record:', fallbackRecord);
+    
+    // Format the fallback record
+    const [wins, losses] = fallbackRecord.split('-');
+    metsInfo.innerHTML = `🧡💙 Let's Go Mets! Currently ${wins}-${losses}! 💙🧡`;
 }
 
 // Check if Mets won a new game
 function checkForMetsWin(currentRecord) {
+    // If no last record, just save current
+    if (!lastMetsRecord) {
+        lastMetsRecord = currentRecord;
+        Storage.set('lastMetsRecord', currentRecord);
+        return null;
+    }
+    
     const [currentWins, currentLosses] = currentRecord.split('-').map(n => parseInt(n));
     const [lastWins, lastLosses] = lastMetsRecord.split('-').map(n => parseInt(n));
     
@@ -158,7 +186,10 @@ function initializeMetsStats() {
     // Load last known record
     lastMetsRecord = Storage.get('lastMetsRecord', '41-24');
     
-    // Try to get live Mets stats
+    // Show loading state
+    initializeMetsDisplay();
+    
+    // Try to get live Mets stats immediately
     updateMetsStats();
     
     // Check for updates periodically
