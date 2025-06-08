@@ -3,6 +3,8 @@
 // Global variables for star messages
 let messageStars = [];
 let currentMessage = '';
+let messageTimeout = null;
+let hasShownMOTD = false;
 
 // ASCII art font for star messages (5x7 grid per character)
 const asciiFont = {
@@ -48,9 +50,10 @@ const asciiFont = {
     '9': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,1],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]]
 };
 
-// Create star message
-function createStarMessage(message) {
+// Create star message with mobile-responsive positioning
+function createStarMessage(message, isEvent = false) {
     // Clear existing message stars
+    clearMessageTimeout();
     messageStars.forEach(star => DOM.remove(star));
     messageStars = [];
     currentMessage = message.toUpperCase();
@@ -58,14 +61,29 @@ function createStarMessage(message) {
     const starsContainer = document.getElementById('stars');
     const charWidth = 6; // 5 pixels + 1 space
     const charHeight = 8; // 7 pixels + 1 space
-    const scale = 3; // Size multiplier
+    const scale = window.innerWidth < 768 ? 2.5 : 3; // Smaller on mobile
     
     // Calculate total width needed
     const totalWidth = message.length * charWidth * scale;
     const startX = (window.innerWidth - totalWidth) / 2;
-    const startY = 20; // Fixed position at very top of screen
     
-    // Create stars for each character
+    // Position based on screen size
+    let startY;
+    if (window.innerWidth < 768) {
+        // Mobile: Position above music container
+        const musicContainer = document.querySelector('.music-container');
+        if (musicContainer) {
+            const rect = musicContainer.getBoundingClientRect();
+            startY = rect.top - (charHeight * scale) - 20;
+        } else {
+            startY = window.innerHeight * 0.5;
+        }
+    } else {
+        // Desktop: Position at top
+        startY = 20;
+    }
+    
+    // Create stars for each character with fade-in animation
     for (let charIndex = 0; charIndex < message.length; charIndex++) {
         const char = message[charIndex].toUpperCase();
         const charPattern = asciiFont[char];
@@ -79,39 +97,60 @@ function createStarMessage(message) {
                             style: {
                                 left: (startX + (charIndex * charWidth + col) * scale) + 'px',
                                 top: (startY + row * scale) + 'px',
-                                animationDelay: (charIndex * 0.1) + 's'
+                                animationDelay: (charIndex * 0.1 + (row + col) * 0.02) + 's',
+                                opacity: '0'
                             }
                         });
                         
                         starsContainer.appendChild(star);
                         messageStars.push(star);
+                        
+                        // Fade in with twinkle
+                        setTimeout(() => {
+                            star.style.opacity = '1';
+                            star.style.animation = 'starMessageAppear 1s forwards, messagePulse 1.5s ease-in-out infinite';
+                            star.style.animationDelay = (charIndex * 0.05 + (row + col) * 0.01) + 's, 0s';
+                        }, 10);
                     }
                 }
             }
         }
     }
     
-    // Remove message after 30 seconds
-    setTimeout(() => {
-        messageStars.forEach(star => {
+    // Remove message after 45 seconds (30 seconds for events)
+    const displayDuration = isEvent ? 30000 : 45000;
+    messageTimeout = setTimeout(() => {
+        messageStars.forEach((star, index) => {
             star.style.animation = 'fadeOut 2s forwards';
+            star.style.animationDelay = (index * 0.01) + 's';
         });
         setTimeout(() => {
             messageStars.forEach(star => DOM.remove(star));
             messageStars = [];
             currentMessage = '';
         }, 2000);
-    }, 30000);
+    }, displayDuration);
 }
 
-// Fetch and display MOTD
+// Clear message timeout
+function clearMessageTimeout() {
+    if (messageTimeout) {
+        clearTimeout(messageTimeout);
+        messageTimeout = null;
+    }
+}
+
+// Fetch and display MOTD (only once)
 async function fetchMOTD() {
+    if (hasShownMOTD) return; // Only show MOTD once
+    
     try {
         const response = await fetch('https://djdarcy.github.io/happy-80th-bday/motd.json');
         if (response.ok) {
             const data = await response.json();
             if (data.message && data.message !== currentMessage) {
-                createStarMessage(data.message);
+                createStarMessage(data.message, false);
+                hasShownMOTD = true; // Mark as shown
             }
         }
     } catch (error) {

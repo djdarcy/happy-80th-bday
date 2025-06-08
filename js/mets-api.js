@@ -127,8 +127,8 @@ function celebrateMetsWin() {
         }, i * 50);
     }
     
-    // Show star message
-    createStarMessage('METS WIN!');
+    // Show star message (marked as event for shorter display)
+    createStarMessage('METS WIN!', true);
     
     setTimeout(() => {
         DOM.removeClass(metsInfo, 'mets-win-celebration');

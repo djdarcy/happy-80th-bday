@@ -9,9 +9,8 @@ window.addEventListener('load', function() {
     // Initialize Mets stats
     initializeMetsStats();
     
-    // Check for MOTD
+    // Check for MOTD (only once on load)
     fetchMOTD();
-    setInterval(fetchMOTD, 60000); // Check every minute
     
     // Initialize SoundCloud
     initializeSoundCloud();
