@@ -1,4 +1,4 @@
-// Baseball Game Logic - Optimized for Performance
+// Baseball Game Logic
 
 // Game state variables
 let score = 0;
@@ -6,10 +6,6 @@ let totalHomeRuns = 0;
 let hasShownTenHomeRunVideo = false;
 let streak = 0;
 let bestStreak = 0;
-
-// Baseball tracking
-let activeBaseballs = [];
-let maxActiveBaseballs = 5; // Limit concurrent baseballs
 
 // Milestone messages for streaks
 const streakMilestones = {
@@ -22,32 +18,8 @@ const streakMilestones = {
     30: "30 hit streak! GOAT! 🐐🔥"
 };
 
-// Clean up inactive baseballs
-function cleanupBaseballs() {
-    activeBaseballs = activeBaseballs.filter(baseball => {
-        if (!baseball.parentNode) {
-            return false;
-        }
-        const rect = baseball.getBoundingClientRect();
-        // Remove if off screen
-        if (rect.left > window.innerWidth + 100) {
-            DOM.remove(baseball);
-            return false;
-        }
-        return true;
-    });
-}
-
 // Baseball mini-game with improved click detection
 function createBaseball() {
-    // Clean up old baseballs
-    cleanupBaseballs();
-    
-    // Limit active baseballs for performance
-    if (activeBaseballs.length >= maxActiveBaseballs) {
-        return;
-    }
-    
     const gameContainer = document.getElementById('gameContainer');
     
     // Occasionally create a special golden baseball
@@ -141,12 +113,6 @@ function createBaseball() {
             createNewStar(starX, starY);
         }, 800);
         
-        // Remove from active list
-        const index = activeBaseballs.indexOf(wrapper);
-        if (index > -1) {
-            activeBaseballs.splice(index, 1);
-        }
-        
         // Remove after animation
         setTimeout(() => {
             DOM.remove(wrapper);
@@ -155,7 +121,7 @@ function createBaseball() {
     
     // Add event listeners
     wrapper.addEventListener('click', handleHit);
-    wrapper.addEventListener('touchstart', handleHit, { passive: false });
+    wrapper.addEventListener('touchstart', handleHit);
     wrapper.addEventListener('pointerdown', handleHit);
     
     // Debug logging
@@ -164,17 +130,11 @@ function createBaseball() {
     }
     
     gameContainer.appendChild(wrapper);
-    activeBaseballs.push(wrapper);
     
     // Remove baseball after it crosses screen (if not clicked)
     setTimeout(() => {
         if (wrapper.parentNode && !isClicked) {
             DOM.remove(wrapper);
-            // Remove from active list
-            const index = activeBaseballs.indexOf(wrapper);
-            if (index > -1) {
-                activeBaseballs.splice(index, 1);
-            }
             // Reset streak if missed
             if (streak > 0) {
                 console.log(`Streak ended at ${streak}`);
@@ -191,9 +151,7 @@ function checkStreakMilestones() {
         
         // Extra celebration for big streaks
         if (streak >= 20) {
-            // Limit confetti for performance
-            const confettiCount = Math.min(20, streak);
-            for (let i = 0; i < confettiCount; i++) {
+            for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
                     createVictoryConfetti();
                 }, i * 50);
@@ -202,19 +160,11 @@ function checkStreakMilestones() {
     }
 }
 
-// Update score display - optimized to avoid reflow
-let scoreUpdateTimeout = null;
+// Update score display
 function updateScoreDisplay() {
-    // Debounce score updates
-    if (scoreUpdateTimeout) {
-        clearTimeout(scoreUpdateTimeout);
-    }
-    
-    scoreUpdateTimeout = setTimeout(() => {
-        const scoreDisplay = document.getElementById('scoreDisplay');
-        let streakText = streak > 2 ? `<div class="streak">Streak: ${streak}! 🔥</div>` : '';
-        scoreDisplay.innerHTML = `Home Runs: ${score}${streakText}<div class="total-score">Total: <span id="totalHomeRuns">${totalHomeRuns}</span></div>`;
-    }, 50);
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    let streakText = streak > 2 ? `<div class="streak">Streak: ${streak}! 🔥</div>` : '';
+    scoreDisplay.innerHTML = `Home Runs: ${score}${streakText}<div class="total-score">Total: <span id="totalHomeRuns">${totalHomeRuns}</span></div>`;
 }
 
 // Show celebration video
@@ -225,7 +175,7 @@ function showCelebrationVideo() {
     DOM.addClass(overlay, 'active');
     video.play();
     
-    // Create extra celebration effects - limited for performance
+    // Create extra celebration effects
     for (let i = 0; i < 30; i++) {
         setTimeout(() => {
             createVictoryConfetti();
@@ -276,9 +226,6 @@ function initializeGame() {
             }
         }, 2500 + Random.between(0, 1000));
     }, 1000);
-    
-    // Periodic cleanup
-    setInterval(cleanupBaseballs, 5000);
     
     // Make closeVideo available globally
     window.closeVideo = closeVideo;
