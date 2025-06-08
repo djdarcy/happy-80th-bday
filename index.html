@@ -32,11 +32,16 @@
             border-radius: 50%;
             cursor: pointer;
             pointer-events: auto;
-            z-index: 6;
+            z-index: 15;
             box-shadow: 
                 0 0 10px rgba(255, 255, 255, 0.8),
                 inset -5px -5px 10px rgba(0, 0, 0, 0.3);
             animation: baseballThrow 4s linear forwards;
+            transition: transform 0.1s ease;
+        }
+        
+        .baseball:hover {
+            transform: scale(1.1);
         }
         
         .baseball::before {
@@ -63,28 +68,61 @@
         
         @keyframes baseballThrow {
             0% {
-                transform: translateX(-50px) translateY(50vh) scale(0.5);
+                transform: translateX(-50px) translateY(0px) scale(0.8);
                 opacity: 1;
             }
+            25% {
+                transform: translateX(25vw) translateY(-15vh) scale(1);
+            }
             50% {
-                transform: translateX(50vw) translateY(30vh) scale(1);
+                transform: translateX(50vw) translateY(-20vh) scale(1.1);
+            }
+            75% {
+                transform: translateX(75vw) translateY(-15vh) scale(1);
             }
             100% {
-                transform: translateX(calc(100vw + 50px)) translateY(50vh) scale(0.5);
+                transform: translateX(calc(100vw + 50px)) translateY(0px) scale(0.8);
                 opacity: 0;
             }
         }
         
-        @keyframes homerun {
+        @keyframes homerunBall {
             0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.5) rotate(180deg);
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
             }
             100% {
-                transform: translateY(-200vh) scale(0.3) rotate(720deg);
+                transform: translateY(-50vh) scale(0.1) rotate(720deg);
                 opacity: 0;
+            }
+        }
+        
+        .new-star {
+            position: absolute;
+            background: #ffff88;
+            border-radius: 50%;
+            width: 3px;
+            height: 3px;
+            box-shadow: 0 0 6px #ffff88;
+            animation: starBirth 2s ease-out forwards;
+            z-index: 1;
+        }
+        
+        @keyframes starBirth {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+                box-shadow: 0 0 20px #ffff88;
+            }
+            50% {
+                transform: scale(3);
+                opacity: 1;
+                box-shadow: 0 0 30px #ffff88;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+                box-shadow: 0 0 6px #ffff88;
             }
         }
         
@@ -124,16 +162,20 @@
         body {
             background: linear-gradient(135deg, #001122 0%, #003366 50%, #001122 100%);
             height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .page-container {
+            height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-family: 'Orbitron', monospace;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            left: 0;
+            position: relative;
         }
         
         /* Animated background stars */
@@ -363,7 +405,7 @@
     <div class="birthday-container">
         <div class="neon-text happy">Happy</div>
         <div class="neon-text number">80th</div>
-        <div class="neon-text birthday">Birthday!</div>
+        <div class="neon-text birthday">Birthday</div>
         <div class="neon-text steve">Steve!</div>
         
         <div class="mets-info">
@@ -377,6 +419,7 @@
                     src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/dustin-darcy/birthday-blues-for-the-mets&color=%23ff5500&inverse=false&auto_play=false&show_user=true"></iframe>
             </div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -418,36 +461,70 @@
             const gameContainer = document.getElementById('gameContainer');
             const baseball = document.createElement('div');
             baseball.className = 'baseball';
-            baseball.style.top = (Math.random() * 60 + 20) + '%';
+            baseball.style.top = (Math.random() * 40 + 30) + '%'; // Start from middle area
             baseball.style.left = '-50px';
             
+            let isClicked = false;
+            
             // Add click event for home run
-            baseball.addEventListener('click', function() {
+            baseball.addEventListener('click', function(e) {
+                if (isClicked) return; // Prevent double clicks
+                isClicked = true;
+                
+                e.stopPropagation();
                 score++;
                 document.getElementById('scoreDisplay').textContent = `Home Runs: ${score}`;
                 
-                // Change animation to home run
-                baseball.style.animation = 'homerun 1s ease-out forwards';
+                // Get current position for star creation
+                const rect = baseball.getBoundingClientRect();
+                const currentX = rect.left + rect.width / 2;
+                const currentY = rect.top + rect.height / 2;
+                
+                // Stop the throwing animation and start home run
+                baseball.style.animationPlayState = 'paused';
+                baseball.style.animation = 'homerunBall 2s ease-out forwards';
                 
                 // Create explosion effect
-                createExplosion(baseball.offsetLeft + 15, baseball.offsetTop + 15);
+                createExplosion(currentX, currentY);
+                
+                // Create new star where ball was hit
+                setTimeout(() => {
+                    createNewStar(currentX, currentY);
+                }, 1800); // Just before ball disappears
                 
                 // Remove after animation
                 setTimeout(() => {
                     if (baseball.parentNode) {
                         baseball.remove();
                     }
-                }, 1000);
+                }, 2000);
             });
             
             gameContainer.appendChild(baseball);
             
-            // Remove baseball after it crosses screen
+            // Remove baseball after it crosses screen (only if not clicked)
             setTimeout(() => {
-                if (baseball.parentNode) {
+                if (baseball.parentNode && !isClicked) {
                     baseball.remove();
                 }
             }, 4000);
+        }
+        
+        // Create a new star where the home run was hit
+        function createNewStar(x, y) {
+            const star = document.createElement('div');
+            star.className = 'new-star';
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
+            
+            // Add to stars container so it persists
+            document.getElementById('stars').appendChild(star);
+            
+            // After birth animation, make it twinkle like other stars
+            setTimeout(() => {
+                star.style.animation = 'twinkle 2s infinite alternate';
+                star.style.animationDelay = Math.random() * 2 + 's';
+            }, 2000);
         }
         
         // Create explosion effect when ball is hit
