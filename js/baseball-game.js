@@ -3,7 +3,7 @@
 // Game state variables
 let score = 0;
 let totalHomeRuns = 0;
-let hasShownStreakVideo = false;
+let hasShownStreakVideo = false; // This resets on page refresh
 let streak = 0;
 let bestStreak = 0;
 let lastStreakMilestone = 0; // Track which milestone we last showed
@@ -29,18 +29,6 @@ function resetStreak(showMessage = true) {
         lastStreakMilestone = 0; // Reset milestone tracker
         updateScoreDisplay();
     }
-}
-
-// Check if we've already shown the video this session
-function hasShownVideoThisSession() {
-    // Use sessionStorage instead of localStorage so it resets when browser closes
-    return sessionStorage.getItem('streakVideoShown') === 'true';
-}
-
-// Mark that we've shown the video this session
-function markVideoShown() {
-    sessionStorage.setItem('streakVideoShown', 'true');
-    hasShownStreakVideo = true;
 }
 
 // Baseball mini-game with improved click detection
@@ -187,11 +175,11 @@ function checkStreakMilestones() {
         createStarMessage(streakMilestones[currentMilestone], true);
         
         // Check for 10-hit streak video celebration
-        if (currentMilestone === 10 && !hasShownVideoThisSession()) {
+        if (currentMilestone === 10 && !hasShownStreakVideo) {
             console.log('10-hit streak achieved! Showing celebration video...');
+            hasShownStreakVideo = true; // Set flag to prevent showing again this page load
             setTimeout(() => {
                 showCelebrationVideo();
-                markVideoShown();
             }, 1000);
         }
         
@@ -288,8 +276,7 @@ function initializeGame() {
     totalHomeRuns = Storage.getNumber('totalHomeRuns', 0);
     bestStreak = Storage.getNumber('bestStreak', 0);
     
-    // Check if video was shown this session
-    hasShownStreakVideo = hasShownVideoThisSession();
+    // hasShownStreakVideo starts as false and will be set to true after first 10-streak
     
     updateScoreDisplay();
     
