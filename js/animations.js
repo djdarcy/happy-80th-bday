@@ -41,11 +41,12 @@ function createConfetti() {
 }
 
 // Create explosion effect when ball is hit
-function createExplosion(x, y) {
-    const sparks = [];
+function createExplosion(x, y, isGolden = false) {
+    const sparkCount = isGolden ? 20 : 12;
+    const sparkColor = isGolden ? '#ffdd44' : '#ffff00';
     
-    for (let i = 0; i < 12; i++) {
-        const angle = (i / 12) * 2 * Math.PI;
+    for (let i = 0; i < sparkCount; i++) {
+        const angle = (i / sparkCount) * 2 * Math.PI;
         const distance = Random.between(50, 80);
         const endX = Math.cos(angle) * distance;
         const endY = Math.sin(angle) * distance;
@@ -55,12 +56,13 @@ function createExplosion(x, y) {
                 position: 'fixed',
                 left: x + 'px',
                 top: y + 'px',
-                width: '4px',
-                height: '4px',
-                background: '#ffff00',
+                width: isGolden ? '6px' : '4px',
+                height: isGolden ? '6px' : '4px',
+                background: sparkColor,
                 borderRadius: '50%',
                 pointerEvents: 'none',
                 zIndex: '10000',
+                boxShadow: `0 0 ${isGolden ? '10px' : '5px'} ${sparkColor}`,
                 '--endX': endX + 'px',
                 '--endY': endY + 'px',
                 animation: 'sparkFly 0.6s ease-out forwards'
@@ -68,12 +70,15 @@ function createExplosion(x, y) {
         });
         
         document.body.appendChild(spark);
-        sparks.push(spark);
     }
     
     // Clean up after animation
     setTimeout(() => {
-        sparks.forEach(spark => DOM.remove(spark));
+        document.querySelectorAll('[style*="sparkFly"]').forEach(spark => {
+            if (spark.parentNode === document.body) {
+                DOM.remove(spark);
+            }
+        });
     }, 600);
 }
 

@@ -1,4 +1,5 @@
 // Star Message System
+// Requires: ascii-font.js to be loaded first
 
 // Global variables for star messages
 let messageStars = [];
@@ -6,51 +7,7 @@ let currentMessage = '';
 let messageTimeout = null;
 let hasShownMOTD = false;
 
-// ASCII art font for star messages (5x7 grid per character)
-const asciiFont = {
-    'A': [[0,1,1,1,0],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1]],
-    'B': [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,0]],
-    'C': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,1],[0,1,1,1,0]],
-    'D': [[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,0]],
-    'E': [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
-    'F': [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],
-    'G': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    'H': [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1]],
-    'I': [[0,1,1,1,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,1,1,1,0]],
-    'J': [[0,0,1,1,1],[0,0,0,1,0],[0,0,0,1,0],[0,0,0,1,0],[0,0,0,1,0],[1,0,0,1,0],[0,1,1,0,0]],
-    'K': [[1,0,0,0,1],[1,0,0,1,0],[1,0,1,0,0],[1,1,0,0,0],[1,0,1,0,0],[1,0,0,1,0],[1,0,0,0,1]],
-    'L': [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
-    'M': [[1,0,0,0,1],[1,1,0,1,1],[1,0,1,0,1],[1,0,1,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1]],
-    'N': [[1,0,0,0,1],[1,1,0,0,1],[1,0,1,0,1],[1,0,0,1,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1]],
-    'O': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    'P': [[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0]],
-    'Q': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,1,0],[0,1,1,0,1]],
-    'R': [[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,0],[1,0,1,0,0],[1,0,0,1,0],[1,0,0,0,1]],
-    'S': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,0],[0,1,1,1,0],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    'T': [[1,1,1,1,1],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
-    'U': [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    'V': [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0]],
-    'W': [[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[1,0,1,0,1],[1,0,1,0,1],[1,1,0,1,1],[1,0,0,0,1]],
-    'X': [[1,0,0,0,1],[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,1,0,1,0],[1,0,0,0,1],[1,0,0,0,1]],
-    'Y': [[1,0,0,0,1],[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0]],
-    'Z': [[1,1,1,1,1],[0,0,0,0,1],[0,0,0,1,0],[0,0,1,0,0],[0,1,0,0,0],[1,0,0,0,0],[1,1,1,1,1]],
-    ' ': [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-    '!': [[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,0,0,0],[0,0,1,0,0]],
-    '?': [[0,1,1,1,0],[1,0,0,0,1],[0,0,0,0,1],[0,0,0,1,0],[0,0,1,0,0],[0,0,0,0,0],[0,0,1,0,0]],
-    '.': [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,1,0,0]],
-    '0': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,1,1],[1,0,1,0,1],[1,1,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    '1': [[0,0,1,0,0],[0,1,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,1,0,0],[0,1,1,1,0]],
-    '2': [[0,1,1,1,0],[1,0,0,0,1],[0,0,0,0,1],[0,0,0,1,0],[0,0,1,0,0],[0,1,0,0,0],[1,1,1,1,1]],
-    '3': [[0,1,1,1,0],[1,0,0,0,1],[0,0,0,0,1],[0,0,1,1,0],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    '4': [[0,0,0,1,0],[0,0,1,1,0],[0,1,0,1,0],[1,0,0,1,0],[1,1,1,1,1],[0,0,0,1,0],[0,0,0,1,0]],
-    '5': [[1,1,1,1,1],[1,0,0,0,0],[1,1,1,1,0],[0,0,0,0,1],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    '6': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,0],[1,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    '7': [[1,1,1,1,1],[0,0,0,0,1],[0,0,0,1,0],[0,0,1,0,0],[0,1,0,0,0],[0,1,0,0,0],[0,1,0,0,0]],
-    '8': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]],
-    '9': [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,1],[0,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0]]
-};
-
-// Create star message with mobile-responsive positioning
+// Create star message with mobile-responsive positioning and scrolling
 function createStarMessage(message, isEvent = false) {
     // Clear existing message stars
     clearMessageTimeout();
@@ -59,17 +16,48 @@ function createStarMessage(message, isEvent = false) {
     currentMessage = message.toUpperCase();
     
     const container = document.getElementById('starMessageContainer');
-    const charWidth = 6; // 5 pixels + 1 space
+    const charWidth = 5; // Adjusted to 5 (was 4, originally 6)
     const charHeight = 8; // 7 pixels + 1 space
-    const scale = window.innerWidth < 768 ? 2.5 : 3; // Smaller on mobile
+    const scale = window.innerWidth < 768 ? 2 : 2.5; // Slightly larger than before
+    const spaceWidth = 3; // Space between words
     
-    // Calculate total width needed
-    const totalWidth = message.length * charWidth * scale;
+    // Calculate total width needed with variable spacing
+    let totalWidth = 0;
+    for (let i = 0; i < message.length; i++) {
+        if (message[i] === ' ') {
+            totalWidth += spaceWidth * scale;
+        } else {
+            totalWidth += charWidth * scale;
+        }
+    }
+    
     const containerRect = container.getBoundingClientRect();
-    const startX = (window.innerWidth - totalWidth) / 2;
+    const needsScrolling = totalWidth > window.innerWidth * 0.9;
+    
+    // Starting position
+    let startX = needsScrolling ? window.innerWidth + 50 : (window.innerWidth - totalWidth) / 2;
     const startY = containerRect.top + (containerRect.height - (charHeight * scale)) / 2;
     
+    // Create a container div for all stars if scrolling
+    let scrollContainer = null;
+    if (needsScrolling) {
+        scrollContainer = DOM.create('div', {
+            id: 'starScrollContainer',
+            style: {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: '1000'
+            }
+        });
+        document.body.appendChild(scrollContainer);
+    }
+    
     // Create stars for each character with fade-in animation
+    let currentX = startX;
     for (let charIndex = 0; charIndex < message.length; charIndex++) {
         const char = message[charIndex].toUpperCase();
         const charPattern = asciiFont[char];
@@ -81,37 +69,92 @@ function createStarMessage(message, isEvent = false) {
                         const star = DOM.create('div', {
                             className: 'message-star',
                             style: {
-                                left: (startX + (charIndex * charWidth + col) * scale) + 'px',
+                                left: (currentX + col * scale) + 'px',
                                 top: (startY + row * scale) + 'px',
-                                animationDelay: (charIndex * 0.1 + (row + col) * 0.02) + 's',
-                                opacity: '0'
+                                animationDelay: (charIndex * 0.05 + (row + col) * 0.01) + 's',
+                                opacity: '0',
+                                width: '2px',
+                                height: '2px'
                             }
                         });
                         
-                        document.body.appendChild(star);
+                        if (needsScrolling) {
+                            scrollContainer.appendChild(star);
+                        } else {
+                            document.body.appendChild(star);
+                        }
                         messageStars.push(star);
                         
                         // Fade in with twinkle
                         setTimeout(() => {
                             star.style.opacity = '1';
                             star.style.animation = 'starMessageAppear 1s forwards, messagePulse 1.5s ease-in-out infinite';
-                            star.style.animationDelay = (charIndex * 0.05 + (row + col) * 0.01) + 's, 0s';
+                            star.style.animationDelay = (charIndex * 0.02 + (row + col) * 0.005) + 's, 0s';
                         }, 10);
                     }
                 }
             }
         }
+        
+        // Move to next character position
+        if (char === ' ') {
+            currentX += spaceWidth * scale;
+        } else {
+            currentX += charWidth * scale;
+        }
     }
     
-    // Remove message after 45 seconds (30 seconds for events)
+    // If scrolling is needed, animate the container
+    if (needsScrolling && scrollContainer) {
+        const scrollDuration = Math.max(15000, totalWidth * 15); // Adjust speed based on length
+        let scrollAnimation = null;
+        let startTime = null;
+        
+        function animateScroll(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const progress = (timestamp - startTime) / scrollDuration;
+            
+            // Calculate position for seamless loop
+            const totalDistance = totalWidth + window.innerWidth + 100;
+            const currentPosition = (progress % 1) * totalDistance;
+            const translateX = window.innerWidth - currentPosition;
+            
+            scrollContainer.style.transform = `translateX(${translateX}px)`;
+            
+            // Continue animation
+            scrollAnimation = requestAnimationFrame(animateScroll);
+        }
+        
+        // Start scrolling after fade-in
+        setTimeout(() => {
+            scrollAnimation = requestAnimationFrame(animateScroll);
+        }, 1000);
+        
+        // Store animation reference for cleanup
+        scrollContainer.scrollAnimation = scrollAnimation;
+    }
+    
+    // Remove message after duration
     const displayDuration = isEvent ? 30000 : 45000;
     messageTimeout = setTimeout(() => {
+        // Cancel scroll animation if exists
+        const existingContainer = document.getElementById('starScrollContainer');
+        if (existingContainer && existingContainer.scrollAnimation) {
+            cancelAnimationFrame(existingContainer.scrollAnimation);
+        }
+        
+        // Fade out stars
         messageStars.forEach((star, index) => {
             star.style.animation = 'fadeOut 2s forwards';
-            star.style.animationDelay = (index * 0.01) + 's';
+            star.style.animationDelay = (index * 0.005) + 's';
         });
+        
+        // Clean up after fade out
         setTimeout(() => {
             messageStars.forEach(star => DOM.remove(star));
+            if (document.getElementById('starScrollContainer')) {
+                DOM.remove(document.getElementById('starScrollContainer'));
+            }
             messageStars = [];
             currentMessage = '';
         }, 2000);
@@ -123,6 +166,12 @@ function clearMessageTimeout() {
     if (messageTimeout) {
         clearTimeout(messageTimeout);
         messageTimeout = null;
+    }
+    
+    // Also clean up any existing scroll container
+    const existingContainer = document.getElementById('starScrollContainer');
+    if (existingContainer && existingContainer.scrollAnimation) {
+        cancelAnimationFrame(existingContainer.scrollAnimation);
     }
 }
 

@@ -4,14 +4,30 @@
 let score = 0;
 let totalHomeRuns = 0;
 let hasShownTenHomeRunVideo = false;
+let streak = 0;
+let bestStreak = 0;
+
+// Milestone messages for streaks
+const streakMilestones = {
+    3: "3 in a row! Nice streak! 🔥",
+    5: "5 hit streak! You're on fire! 🔥🔥",
+    10: "10 hit streak! Incredible! ⚾🔥",
+    15: "15 hit streak! Unstoppable! 🌟🔥",
+    20: "20 hit streak! Hall of Fame! 🏆🔥",
+    25: "25 hit streak! Legend! 👑🔥",
+    30: "30 hit streak! GOAT! 🐐🔥"
+};
 
 // Baseball mini-game with improved click detection
 function createBaseball() {
     const gameContainer = document.getElementById('gameContainer');
     
+    // Occasionally create a special golden baseball
+    const isGolden = Random.between(0, 100) < 5; // 5% chance
+    
     // Create wrapper div that will handle clicks
     const wrapper = DOM.create('div', {
-        className: 'baseball-wrapper',
+        className: 'baseball-wrapper' + (isGolden ? ' golden-baseball' : ''),
         style: {
             width: window.gameSettings.clickTargetSize + 'px',
             height: window.gameSettings.clickTargetSize + 'px',
@@ -29,7 +45,7 @@ function createBaseball() {
     // Create the visual emoji
     const baseballVisual = DOM.create('div', {
         className: 'baseball-visual',
-        textContent: '⚾'
+        textContent: isGolden ? '⭐' : '⚾'
     });
     
     // Assemble the structure
@@ -51,16 +67,27 @@ function createBaseball() {
             showClickLocation(e.clientX, e.clientY, true);
         }
         
-        console.log('Home run! Baseball clicked');
+        // Points for hit
+        const points = isGolden ? 5 : 1;
+        console.log(isGolden ? 'Golden star hit! +5 points!' : 'Home run! Baseball clicked');
         
         // Update scores
-        score++;
-        totalHomeRuns++;
+        score += points;
+        totalHomeRuns += points;
+        streak++;
+        if (streak > bestStreak) {
+            bestStreak = streak;
+            Storage.setNumber('bestStreak', bestStreak);
+        }
+        
+        // Check for streak milestones
+        checkStreakMilestones();
+        
         updateScoreDisplay();
         Storage.setNumber('totalHomeRuns', totalHomeRuns);
         
         // Check for 10 home runs celebration
-        if (score === 10 && !hasShownTenHomeRunVideo) {
+        if (score >= 10 && !hasShownTenHomeRunVideo) {
             hasShownTenHomeRunVideo = true;
             setTimeout(() => {
                 showCelebrationVideo();
@@ -76,7 +103,7 @@ function createBaseball() {
         DOM.addClass(wrapper, 'home-run');
         
         // Create explosion effect
-        createExplosion(centerX, centerY);
+        createExplosion(centerX, centerY, isGolden);
         
         // Create new star at the peak of the animation
         setTimeout(() => {
@@ -99,7 +126,7 @@ function createBaseball() {
     
     // Debug logging
     if (window.gameSettings.debugMode) {
-        console.log('Baseball created');
+        console.log('Baseball created' + (isGolden ? ' (GOLDEN!)' : ''));
     }
     
     gameContainer.appendChild(wrapper);
@@ -108,14 +135,36 @@ function createBaseball() {
     setTimeout(() => {
         if (wrapper.parentNode && !isClicked) {
             DOM.remove(wrapper);
+            // Reset streak if missed
+            if (streak > 0) {
+                console.log(`Streak ended at ${streak}`);
+                streak = 0;
+            }
         }
     }, window.gameSettings.slowMotion ? 12000 : 4000);
+}
+
+// Check for streak milestones
+function checkStreakMilestones() {
+    if (streakMilestones[streak]) {
+        createStarMessage(streakMilestones[streak], true);
+        
+        // Extra celebration for big streaks
+        if (streak >= 20) {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createVictoryConfetti();
+                }, i * 50);
+            }
+        }
+    }
 }
 
 // Update score display
 function updateScoreDisplay() {
     const scoreDisplay = document.getElementById('scoreDisplay');
-    scoreDisplay.innerHTML = `Home Runs: ${score}<div class="total-score">Total: <span id="totalHomeRuns">${totalHomeRuns}</span></div>`;
+    let streakText = streak > 2 ? `<div class="streak">Streak: ${streak}! 🔥</div>` : '';
+    scoreDisplay.innerHTML = `Home Runs: ${score}${streakText}<div class="total-score">Total: <span id="totalHomeRuns">${totalHomeRuns}</span></div>`;
 }
 
 // Show celebration video
@@ -162,8 +211,9 @@ function showClickLocation(x, y, hit) {
 
 // Initialize game
 function initializeGame() {
-    // Load saved total home runs
+    // Load saved values
     totalHomeRuns = Storage.getNumber('totalHomeRuns', 0);
+    bestStreak = Storage.getNumber('bestStreak', 0);
     updateScoreDisplay();
     
     // Start baseball game with staggered timing

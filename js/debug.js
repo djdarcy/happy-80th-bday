@@ -168,7 +168,19 @@ function initializeDebug() {
             if (confirm('Clear all saved data? This will reset home runs, song plays, and Mets record.')) {
                 localStorage.clear();
                 console.log('All localStorage data cleared!');
-                alert('All saved data has been cleared. Refresh the page to see changes.');
+                
+                // Reset displayed values
+                score = 0;
+                totalHomeRuns = 0;
+                songPlays = 0;
+                hasShownTenHomeRunVideo = false;
+                lastMetsRecord = '41-24';
+                
+                // Update displays
+                updateScoreDisplay();
+                updateSongPlaysDisplay();
+                
+                alert('All saved data has been cleared and displays reset!');
             }
         }
     });
